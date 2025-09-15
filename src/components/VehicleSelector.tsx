@@ -73,8 +73,8 @@ export const VehicleSelector = ({ onDimensionsFound, onSearch }: VehicleSelector
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Marque</label>
             <Select 
-              value={selectedMarque?.toString()} 
-              onValueChange={(value) => setSelectedMarque(parseInt(value))}
+              value={selectedMarque?.toString() || ""} 
+              onValueChange={(value) => setSelectedMarque(value ? parseInt(value) : undefined)}
             >
               <SelectTrigger className="h-12 bg-background border-border hover:border-primary transition-colors">
                 <SelectValue placeholder={loadingMarques ? "Chargement..." : "Choisir une marque"} />
@@ -93,8 +93,8 @@ export const VehicleSelector = ({ onDimensionsFound, onSearch }: VehicleSelector
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Modèle</label>
             <Select 
-              value={selectedModele?.toString()} 
-              onValueChange={(value) => setSelectedModele(parseInt(value))}
+              value={selectedModele?.toString() || ""} 
+              onValueChange={(value) => setSelectedModele(value ? parseInt(value) : undefined)}
               disabled={!selectedMarque}
             >
               <SelectTrigger className="h-12 bg-background border-border hover:border-primary transition-colors disabled:opacity-50">
@@ -117,8 +117,8 @@ export const VehicleSelector = ({ onDimensionsFound, onSearch }: VehicleSelector
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Année</label>
             <Select 
-              value={selectedAnnee?.toString()} 
-              onValueChange={(value) => setSelectedAnnee(parseInt(value))}
+              value={selectedAnnee?.toString() || ""} 
+              onValueChange={(value) => setSelectedAnnee(value ? parseInt(value) : undefined)}
               disabled={!selectedModele}
             >
               <SelectTrigger className="h-12 bg-background border-border hover:border-primary transition-colors disabled:opacity-50">
