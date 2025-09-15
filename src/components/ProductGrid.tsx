@@ -1,16 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
-import { cspCatalog, getProductsInStock, getProductsOnSale, searchProducts } from "@/data/cspCatalog";
+import { supabase } from "@/integrations/supabase/client";
 import tireSample from "@/assets/tire-sample.jpg";
+
+interface Pneu {
+  id: number;
+  marque: string;
+  modele: string;
+  dimensions: string;
+  type: string;
+  prix: number;
+  stock: number;
+  description: string | null;
+  image_url: string | null;
+}
 
 const ProductGrid = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [products] = useState(cspCatalog);
-  const [filteredProducts, setFilteredProducts] = useState(cspCatalog);
+  const [products, setProducts] = useState<Pneu[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Pneu[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('pneus')
+          .select('*')
+          .order('marque', { ascending: true });
+        
+        if (error) {
+          console.error('Erreur lors de la récupération des produits:', error);
+        } else {
+          setProducts(data || []);
+          setFilteredProducts(data || []);
+        }
+      } catch (error) {
+        console.error('Erreur:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleAddToCart = (productId: string) => {
     console.log("Ajouter au panier:", productId);
@@ -18,20 +57,19 @@ const ProductGrid = () => {
   };
 
   // Convertir les données pour le composant ProductCard
-  const convertToProductCard = (product: any) => ({
-    id: product.id,
+  const convertToProductCard = (product: Pneu) => ({
+    id: product.id.toString(),
     name: product.modele,
     brand: product.marque,
-    price: product.prixPromo || product.prixUnitaire,
-    originalPrice: product.prixPromo ? product.prixUnitaire : undefined,
+    price: product.prix,
     rating: 4.5 + Math.random() * 0.5, // Note simulée
     reviews: Math.floor(Math.random() * 300) + 50,
-    size: product.dimension,
-    features: product.caracteristiques.slice(0, 3),
-    inStock: product.enStock,
+    size: product.dimensions,
+    features: [product.type, 'Qualité premium', 'Garantie constructeur'],
+    inStock: product.stock > 0,
     stockCount: product.stock,
-    isPromo: !!product.prixPromo,
-    image: tireSample
+    isPromo: false,
+    image: product.image_url || tireSample
   });
 
   const applyFilters = (brand?: string, priceRange?: string, inStockOnly?: boolean) => {
@@ -44,17 +82,31 @@ const ProductGrid = () => {
     if (priceRange) {
       const [min, max] = priceRange.split('-').map(Number);
       filtered = filtered.filter(p => {
-        const price = p.prixPromo || p.prixUnitaire;
+        const price = p.prix;
         return price >= min && (max ? price <= max : true);
       });
     }
     
     if (inStockOnly) {
-      filtered = filtered.filter(p => p.enStock);
+      filtered = filtered.filter(p => p.stock > 0);
     }
     
     setFilteredProducts(filtered);
   };
+
+  const uniqueBrands = Array.from(new Set(products.map(p => p.marque))).sort();
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">Chargement du catalogue...</h2>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-background">
@@ -115,12 +167,17 @@ const ProductGrid = () => {
                   <div>
                     <h4 className="font-medium mb-3">Marques</h4>
                     <div className="space-y-2">
-                      {['Michelin', 'Continental', 'Bridgestone', 'Pirelli', 'Goodyear', 'Hankook'].map((brand) => (
+                      {uniqueBrands.map((brand) => (
                         <label key={brand} className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox" 
                             className="rounded" 
-                            onChange={(e) => applyFilters(e.target.checked ? brand : undefined)}
+                            checked={selectedBrand === brand}
+                            onChange={(e) => {
+                              const newBrand = e.target.checked ? brand : null;
+                              setSelectedBrand(newBrand);
+                              applyFilters(newBrand || undefined);
+                            }}
                           />
                           <span className="text-sm">{brand}</span>
                         </label>
@@ -133,19 +190,35 @@ const ProductGrid = () => {
                     <h4 className="font-medium mb-3">Prix</h4>
                     <div className="space-y-2">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '0-120')}
+                        />
                         <span className="text-sm">0 DT - 120 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '120-180')}
+                        />
                         <span className="text-sm">120 DT - 180 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '180-240')}
+                        />
                         <span className="text-sm">180 DT - 240 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '240-')}
+                        />
                         <span className="text-sm">240 DT+</span>
                       </label>
                     </div>
@@ -156,12 +229,12 @@ const ProductGrid = () => {
                     <h4 className="font-medium mb-3">Disponibilité</h4>
                     <div className="space-y-2">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
+                        <input 
+                          type="checkbox" 
+                          className="rounded" 
+                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, undefined, true)}
+                        />
                         <span className="text-sm">En stock</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" className="rounded" />
-                        <span className="text-sm">Promotion</span>
                       </label>
                     </div>
                   </div>
@@ -187,12 +260,20 @@ const ProductGrid = () => {
               ))}
             </div>
 
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Aucun pneu trouvé avec les filtres sélectionnés.</p>
+              </div>
+            )}
+
             {/* Load more */}
-            <div className="text-center mt-12">
-              <Button variant="outline" size="lg" className="min-w-48">
-                Charger plus de produits
-              </Button>
-            </div>
+            {filteredProducts.length > 0 && (
+              <div className="text-center mt-12">
+                <Button variant="outline" size="lg" className="min-w-48">
+                  Charger plus de produits
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
