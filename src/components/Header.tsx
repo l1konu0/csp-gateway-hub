@@ -108,14 +108,16 @@ const Header = ({ onSearch }: HeaderProps) => {
               )}
 
               {/* Cart */}
-              <Button variant="outline" size="sm" className="relative">
-                <ShoppingCart className="h-4 w-4" />
-                {cartCount > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                    {cartCount}
-                  </Badge>
-                )}
-                <span className="ml-2 hidden sm:inline">Panier</span>
+              <Button variant="outline" size="sm" className="relative" asChild>
+                <Link to="/cart">
+                  <ShoppingCart className="h-4 w-4" />
+                  {cartCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                      {cartCount}
+                    </Badge>
+                  )}
+                  <span className="ml-2 hidden sm:inline">Panier</span>
+                </Link>
               </Button>
 
               {/* Mobile menu */}
