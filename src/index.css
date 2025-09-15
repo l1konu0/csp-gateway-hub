@@ -16,10 +16,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Bordeaux professionnel */
-    --primary: 345 65% 35%;
+    /* Rouge foncé professionnel */
+    --primary: 0 75% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 345 70% 40%;
+    --primary-glow: 0 80% 45%;
 
     /* Gris clair */
     --secondary: 0 0% 96%;
@@ -39,17 +39,17 @@
     --input: 0 0% 88%;
     --ring: 0 84% 45%;
 
-    /* Gradients avec bordeaux et noir */
-    --gradient-primary: linear-gradient(135deg, hsl(345 65% 35%), hsl(345 70% 40%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 5% / 0.95), hsl(345 65% 35% / 0.90));
+    /* Gradients avec rouge foncé et noir */
+    --gradient-primary: linear-gradient(135deg, hsl(0 75% 40%), hsl(0 80% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 5% / 0.95), hsl(0 75% 40% / 0.90));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
-    --gradient-elegant: linear-gradient(145deg, hsl(345 65% 35% / 0.05), hsl(345 70% 40% / 0.08));
+    --gradient-elegant: linear-gradient(145deg, hsl(0 75% 40% / 0.05), hsl(0 80% 45% / 0.08));
     
-    /* Shadows avec bordeaux */
-    --shadow-soft: 0 4px 20px hsl(345 65% 35% / 0.12);
-    --shadow-glow: 0 8px 32px hsl(345 65% 35% / 0.18);
-    --shadow-premium: 0 12px 48px hsl(345 65% 35% / 0.15);
-    --shadow-luxury: 0 20px 60px hsl(345 65% 35% / 0.20);
+    /* Shadows avec rouge foncé */
+    --shadow-soft: 0 4px 20px hsl(0 75% 40% / 0.12);
+    --shadow-glow: 0 8px 32px hsl(0 75% 40% / 0.18);
+    --shadow-premium: 0 12px 48px hsl(0 75% 40% / 0.15);
+    --shadow-luxury: 0 20px 60px hsl(0 75% 40% / 0.20);
 
     /* Animations professionnelles */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
