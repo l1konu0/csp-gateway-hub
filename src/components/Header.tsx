@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Search, Menu, Phone } from "lucide-react";
+import { ShoppingCart, Search, Menu, Phone, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
 }
 
 const Header = ({ onSearch }: HeaderProps) => {
-  const [cartCount] = useState(0);
+  const { user, isAdmin, signOut } = useAuth();
+  const { cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -75,6 +79,34 @@ const Header = ({ onSearch }: HeaderProps) => {
 
             {/* Actions */}
             <div className="flex items-center gap-4">
+              {/* Auth buttons */}
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground hidden sm:inline">
+                    {user.email}
+                  </span>
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/admin">
+                        <User className="h-4 w-4 mr-2" />
+                        Admin
+                      </Link>
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={signOut}>
+                    <LogOut className="h-4 w-4" />
+                    <span className="ml-2 hidden sm:inline">Déconnexion</span>
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/auth">
+                    <User className="h-4 w-4 mr-2" />
+                    Connexion
+                  </Link>
+                </Button>
+              )}
+
               {/* Cart */}
               <Button variant="outline" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4" />

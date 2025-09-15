@@ -2,6 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, ShoppingCart, Zap } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCart } from "@/hooks/useCart";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface ProductCardProps {
   product: {
@@ -23,9 +27,30 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+  const { user } = useAuth();
+  const { addToCart, isAddingToCart } = useCart();
+  const { toast } = useToast();
+
   const discount = product.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+
+  const handleAddToCart = () => {
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter pour ajouter des produits au panier.",
+        action: (
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/auth">Se connecter</Link>
+          </Button>
+        ),
+      });
+      return;
+    }
+
+    addToCart({ pneuId: parseInt(product.id) });
+  };
 
   return (
     <Card className="group overflow-hidden shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-1 bg-gradient-card">
@@ -126,11 +151,16 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       <CardFooter className="p-4 pt-0">
         <Button 
           className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-          onClick={() => onAddToCart(product.id)}
-          disabled={!product.inStock}
+          onClick={handleAddToCart}
+          disabled={!product.inStock || isAddingToCart}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {product.inStock ? 'Ajouter au panier' : 'Rupture de stock'}
+          {!product.inStock 
+            ? 'Rupture de stock' 
+            : isAddingToCart 
+              ? 'Ajout...' 
+              : 'Ajouter au panier'
+          }
         </Button>
       </CardFooter>
     </Card>
