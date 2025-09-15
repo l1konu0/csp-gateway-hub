@@ -36,7 +36,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company info */}
           <div>
-            <h3 className="text-2xl font-bold mb-4">CSP Pneu</h3>
+            <h3 className="text-2xl font-bold mb-4">CSP Chahbani Star Pneu</h3>
             <p className="text-primary-foreground/80 mb-6">
               Spécialiste pneus depuis 1995. Votre partenaire de confiance pour tous vos besoins en pneumatiques.
             </p>
@@ -84,26 +84,26 @@ const Footer = () => {
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5 text-accent" />
                 <div>
-                  <p className="text-primary-foreground/80">123 Avenue des Pneus</p>
-                  <p className="text-primary-foreground/80">75000 Paris, France</p>
+                  <p className="text-primary-foreground/80">46 Avenue Habib Bourguiba</p>
+                  <p className="text-primary-foreground/80">2046 Tunis, Tunisie</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/80">01 23 45 67 89</p>
+                <p className="text-primary-foreground/80">+216 71 123 456</p>
               </div>
               
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/80">contact@csp-pneu.fr</p>
+                <p className="text-primary-foreground/80">contact@csp-pneu.tn</p>
               </div>
               
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 mt-0.5 text-accent" />
                 <div>
-                  <p className="text-primary-foreground/80">Lun-Ven: 8h-18h</p>
-                  <p className="text-primary-foreground/80">Sam: 8h-17h</p>
+                  <p className="text-primary-foreground/80">Lun-Ven: 8h-19h</p>
+                  <p className="text-primary-foreground/80">Sam: 8h-18h • Dim: Fermé</p>
                 </div>
               </div>
             </div>
@@ -116,7 +116,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-primary-foreground/80 text-sm">
-              © 2024 CSP Pneu. Tous droits réservés.
+              © 2024 CSP Chahbani Star Pneu. Tous droits réservés.
             </p>
             <div className="flex gap-6 text-sm">
               <a href="#" className="text-primary-foreground/80 hover:text-white transition-colors">
