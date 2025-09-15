@@ -3,8 +3,31 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Search, Menu, Phone } from "lucide-react";
 import { useState } from "react";
 
-const Header = () => {
+interface HeaderProps {
+  onSearch?: (query: string) => void;
+}
+
+const Header = ({ onSearch }: HeaderProps) => {
   const [cartCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onSearch && searchQuery.trim()) {
+      onSearch(searchQuery.trim());
+    }
+  };
+
+  const handleSearchInput = (value: string) => {
+    setSearchQuery(value);
+    // Recherche en temps réel après 2 caractères
+    if (onSearch && value.length >= 2) {
+      onSearch(value);
+    } else if (onSearch && value.length === 0) {
+      // Réinitialiser la recherche si le champ est vide
+      onSearch("");
+    }
+  };
 
   return (
     <header className="bg-card shadow-soft sticky top-0 z-50">
@@ -37,16 +60,18 @@ const Header = () => {
             </div>
 
             {/* Search bar - Desktop */}
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchInput(e.target.value)}
                   placeholder="Rechercher par marque, dimension..."
                   className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
                 />
               </div>
-            </div>
+            </form>
 
             {/* Actions */}
             <div className="flex items-center gap-4">
@@ -80,16 +105,18 @@ const Header = () => {
             </div>
             
             {/* Mobile search */}
-            <div className="md:hidden flex-1">
+            <form onSubmit={handleSearch} className="md:hidden flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearchInput(e.target.value)}
                   placeholder="Rechercher..."
                   className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
                 />
               </div>
-            </div>
+            </form>
           </div>
         </nav>
       </div>

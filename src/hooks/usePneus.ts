@@ -56,3 +56,34 @@ export const usePneusByMarque = (marque?: string) => {
     },
   });
 };
+
+export const usePneusSearch = (searchQuery?: string, marque?: string) => {
+  return useQuery({
+    queryKey: ["pneus", "search", searchQuery, marque],
+    queryFn: async () => {
+      let query = supabase
+        .from("pneus")
+        .select("*")
+        .order("marque", { ascending: true });
+      
+      // Filtrer par marque si spécifiée
+      if (marque && marque !== "Toutes") {
+        query = query.eq("marque", marque);
+      }
+      
+      // Ajouter la recherche textuelle si spécifiée
+      if (searchQuery && searchQuery.trim()) {
+        const searchTerm = searchQuery.trim().toLowerCase();
+        query = query.or(`marque.ilike.%${searchTerm}%,modele.ilike.%${searchTerm}%,dimensions.ilike.%${searchTerm}%,type.ilike.%${searchTerm}%`);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data as Pneu[];
+    },
+  });
+};

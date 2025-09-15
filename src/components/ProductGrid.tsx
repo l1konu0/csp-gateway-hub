@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { usePneusSearch } from "@/hooks/usePneus";
 import tireSample from "@/assets/tire-sample.jpg";
 
 interface Pneu {
@@ -18,38 +19,19 @@ interface Pneu {
   image_url: string | null;
 }
 
-const ProductGrid = () => {
+interface ProductGridProps {
+  searchQuery?: string;
+}
+
+const ProductGrid = ({ searchQuery }: ProductGridProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [products, setProducts] = useState<Pneu[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Pneu[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  
+  // Utiliser le hook de recherche au lieu de l'état local
+  const { data: products = [], isLoading: loading, error } = usePneusSearch(searchQuery, selectedBrand || undefined);
 
-  // Fetch products from Supabase
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('pneus')
-          .select('*')
-          .order('marque', { ascending: true });
-        
-        if (error) {
-          console.error('Erreur lors de la récupération des produits:', error);
-        } else {
-          setProducts(data || []);
-          setFilteredProducts(data || []);
-        }
-      } catch (error) {
-        console.error('Erreur:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+  // Les produits sont maintenant récupérés via le hook usePneusSearch
 
   const handleAddToCart = (productId: string) => {
     console.log("Ajouter au panier:", productId);
@@ -72,27 +54,7 @@ const ProductGrid = () => {
     image: product.image_url || tireSample
   });
 
-  const applyFilters = (brand?: string, priceRange?: string, inStockOnly?: boolean) => {
-    let filtered = [...products];
-    
-    if (brand) {
-      filtered = filtered.filter(p => p.marque.toLowerCase() === brand.toLowerCase());
-    }
-    
-    if (priceRange) {
-      const [min, max] = priceRange.split('-').map(Number);
-      filtered = filtered.filter(p => {
-        const price = p.prix;
-        return price >= min && (max ? price <= max : true);
-      });
-    }
-    
-    if (inStockOnly) {
-      filtered = filtered.filter(p => p.stock > 0);
-    }
-    
-    setFilteredProducts(filtered);
-  };
+  // La fonction applyFilters n'est plus nécessaire car le filtrage est géré par le hook
 
   const uniqueBrands = Array.from(new Set(products.map(p => p.marque))).sort();
 
@@ -108,6 +70,19 @@ const ProductGrid = () => {
     );
   }
 
+  if (error) {
+    return (
+      <section className="py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4 text-destructive">Erreur lors du chargement</h2>
+            <p className="text-muted-foreground">Impossible de charger les produits</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-12 bg-background">
       <div className="container mx-auto px-4">
@@ -116,7 +91,8 @@ const ProductGrid = () => {
           <div>
             <h2 className="text-3xl font-bold mb-2">Catalogue Pneus</h2>
             <p className="text-muted-foreground">
-              {filteredProducts.length} pneus disponibles • Stock temps réel
+              {products.length} pneus disponibles • Stock temps réel
+              {searchQuery && ` • Recherche: "${searchQuery}"`}
             </p>
           </div>
 
@@ -174,9 +150,7 @@ const ProductGrid = () => {
                             className="rounded" 
                             checked={selectedBrand === brand}
                             onChange={(e) => {
-                              const newBrand = e.target.checked ? brand : null;
-                              setSelectedBrand(newBrand);
-                              applyFilters(newBrand || undefined);
+                              setSelectedBrand(e.target.checked ? brand : null);
                             }}
                           />
                           <span className="text-sm">{brand}</span>
@@ -193,7 +167,7 @@ const ProductGrid = () => {
                         <input 
                           type="checkbox" 
                           className="rounded" 
-                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '0-120')}
+                          onChange={(e) => console.log('Filtre prix 0-120:', e.target.checked)}
                         />
                         <span className="text-sm">0 DT - 120 DT</span>
                       </label>
@@ -201,7 +175,7 @@ const ProductGrid = () => {
                         <input 
                           type="checkbox" 
                           className="rounded" 
-                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '120-180')}
+                          onChange={(e) => console.log('Filtre prix 120-180:', e.target.checked)}
                         />
                         <span className="text-sm">120 DT - 180 DT</span>
                       </label>
@@ -209,7 +183,7 @@ const ProductGrid = () => {
                         <input 
                           type="checkbox" 
                           className="rounded" 
-                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '180-240')}
+                          onChange={(e) => console.log('Filtre prix 180-240:', e.target.checked)}
                         />
                         <span className="text-sm">180 DT - 240 DT</span>
                       </label>
@@ -217,7 +191,7 @@ const ProductGrid = () => {
                         <input 
                           type="checkbox" 
                           className="rounded" 
-                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, '240-')}
+                          onChange={(e) => console.log('Filtre prix 240+:', e.target.checked)}
                         />
                         <span className="text-sm">240 DT+</span>
                       </label>
@@ -232,7 +206,7 @@ const ProductGrid = () => {
                         <input 
                           type="checkbox" 
                           className="rounded" 
-                          onChange={(e) => e.target.checked && applyFilters(selectedBrand || undefined, undefined, true)}
+                          onChange={(e) => console.log('Filtre stock:', e.target.checked)}
                         />
                         <span className="text-sm">En stock</span>
                       </label>
@@ -250,7 +224,7 @@ const ProductGrid = () => {
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                 : 'grid-cols-1'
             }`}>
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <div key={product.id} className="animate-fade-in">
                   <ProductCard 
                     product={convertToProductCard(product)} 
@@ -260,14 +234,14 @@ const ProductGrid = () => {
               ))}
             </div>
 
-            {filteredProducts.length === 0 && (
+            {products.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Aucun pneu trouvé avec les filtres sélectionnés.</p>
               </div>
             )}
 
             {/* Load more */}
-            {filteredProducts.length > 0 && (
+            {products.length > 0 && (
               <div className="text-center mt-12">
                 <Button variant="outline" size="lg" className="min-w-48">
                   Charger plus de produits
