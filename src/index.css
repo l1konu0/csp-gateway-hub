@@ -16,10 +16,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Rouge principal */
-    --primary: 0 84% 45%;
+    /* Bordeaux professionnel */
+    --primary: 345 65% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 0 84% 55%;
+    --primary-glow: 345 70% 40%;
 
     /* Gris clair */
     --secondary: 0 0% 96%;
@@ -39,19 +39,22 @@
     --input: 0 0% 88%;
     --ring: 0 84% 45%;
 
-    /* Gradients avec rouge et noir */
-    --gradient-primary: linear-gradient(135deg, hsl(0 84% 45%), hsl(0 84% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 15% / 0.95), hsl(0 84% 45% / 0.85));
+    /* Gradients avec bordeaux et noir */
+    --gradient-primary: linear-gradient(135deg, hsl(345 65% 35%), hsl(345 70% 40%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 5% / 0.95), hsl(345 65% 35% / 0.90));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --gradient-elegant: linear-gradient(145deg, hsl(345 65% 35% / 0.05), hsl(345 70% 40% / 0.08));
     
-    /* Shadows avec rouge */
-    --shadow-soft: 0 4px 20px hsl(0 84% 45% / 0.08);
-    --shadow-glow: 0 8px 32px hsl(0 84% 45% / 0.15);
-    --shadow-premium: 0 12px 48px hsl(0 84% 45% / 0.12);
+    /* Shadows avec bordeaux */
+    --shadow-soft: 0 4px 20px hsl(345 65% 35% / 0.12);
+    --shadow-glow: 0 8px 32px hsl(345 65% 35% / 0.18);
+    --shadow-premium: 0 12px 48px hsl(345 65% 35% / 0.15);
+    --shadow-luxury: 0 20px 60px hsl(345 65% 35% / 0.20);
 
-    /* Animations fluides */
+    /* Animations professionnelles */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-luxury: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     --radius: 0.5rem;
 
@@ -118,5 +121,20 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Classes professionnelles */
+  .btn-luxury {
+    @apply bg-gradient-primary text-primary-foreground shadow-luxury hover:shadow-glow transition-luxury hover:scale-[1.02];
+  }
+  
+  .card-professional {
+    @apply bg-gradient-elegant backdrop-blur-sm border border-primary/10 shadow-premium hover:shadow-luxury transition-luxury;
+  }
+  
+  .text-shimmer {
+    @apply bg-gradient-to-r from-primary via-primary-glow to-primary bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer;
   }
 }
