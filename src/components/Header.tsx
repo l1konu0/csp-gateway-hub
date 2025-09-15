@@ -1,0 +1,102 @@
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingCart, Search, Menu, Phone } from "lucide-react";
+import { useState } from "react";
+
+const Header = () => {
+  const [cartCount] = useState(0);
+
+  return (
+    <header className="bg-card shadow-soft sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        {/* Top bar */}
+        <div className="border-b border-border py-2">
+          <div className="flex justify-between items-center text-sm text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Spécialiste pneus depuis 1995
+              </span>
+            </div>
+            <div className="hidden md:flex items-center gap-4">
+              <span>Livraison gratuite dès 200€</span>
+              <span>•</span>
+              <span>Montage professionnel</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Main header */}
+        <div className="py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                CSP Pneu
+              </h1>
+            </div>
+
+            {/* Search bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-md mx-8">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Rechercher par marque, dimension..."
+                  className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-4">
+              {/* Cart */}
+              <Button variant="outline" size="sm" className="relative">
+                <ShoppingCart className="h-4 w-4" />
+                {cartCount > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {cartCount}
+                  </Badge>
+                )}
+                <span className="ml-2 hidden sm:inline">Panier</span>
+              </Button>
+
+              {/* Mobile menu */}
+              <Button variant="outline" size="sm" className="md:hidden">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="border-t border-border py-3">
+          <div className="flex items-center justify-between">
+            <div className="hidden md:flex items-center space-x-8">
+              <Button variant="ghost" className="font-medium">Pneus Auto</Button>
+              <Button variant="ghost" className="font-medium">Pneus Moto</Button>
+              <Button variant="ghost" className="font-medium">Pneus Camion</Button>
+              <Button variant="ghost" className="font-medium">Jantes</Button>
+              <Button variant="ghost" className="font-medium">Services</Button>
+              <Button variant="ghost" className="font-medium">Contact</Button>
+            </div>
+            
+            {/* Mobile search */}
+            <div className="md:hidden flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                />
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
