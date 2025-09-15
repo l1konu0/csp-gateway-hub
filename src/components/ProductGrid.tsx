@@ -3,75 +3,57 @@ import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
+import { cspCatalog, getProductsInStock, getProductsOnSale, searchProducts } from "@/data/cspCatalog";
 import tireSample from "@/assets/tire-sample.jpg";
-
-// Sample data - will be replaced with Supabase data
-const sampleProducts = [
-  {
-    id: "1",
-    name: "Michelin Pilot Sport 4",
-    brand: "Michelin",
-    price: 175,
-    originalPrice: 199,
-    rating: 4.8,
-    reviews: 234,
-    size: "205/55 R16 91V",
-    features: ["Sport", "Adhérence", "Longévité"],
-    inStock: true,
-    stockCount: 12,
-    isPromo: true,
-    image: tireSample
-  },
-  {
-    id: "2",
-    name: "Continental PremiumContact 6",
-    brand: "Continental",
-    price: 159,
-    rating: 4.6,
-    reviews: 187,
-    size: "225/45 R17 94W",
-    features: ["Confort", "Silence", "Efficacité"],
-    inStock: true,
-    stockCount: 8,
-    image: tireSample
-  },
-  {
-    id: "3",
-    name: "Bridgestone Turanza T005",
-    brand: "Bridgestone",
-    price: 154,
-    originalPrice: 179,
-    rating: 4.5,
-    reviews: 156,
-    size: "195/65 R15 91H",
-    features: ["Tourisme", "Économie", "Durabilité"],
-    inStock: true,
-    stockCount: 3,
-    isPromo: true,
-    image: tireSample
-  },
-  {
-    id: "4",
-    name: "Pirelli Cinturato P7",
-    brand: "Pirelli",
-    price: 167,
-    rating: 4.7,
-    reviews: 298,
-    size: "215/60 R16 95H",
-    features: ["Écologique", "Performance", "Sécurité"],
-    inStock: false,
-    stockCount: 0,
-    image: tireSample
-  },
-];
 
 const ProductGrid = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [products] = useState(cspCatalog);
+  const [filteredProducts, setFilteredProducts] = useState(cspCatalog);
 
   const handleAddToCart = (productId: string) => {
     console.log("Ajouter au panier:", productId);
     // TODO: Implement with Supabase
+  };
+
+  // Convertir les données pour le composant ProductCard
+  const convertToProductCard = (product: any) => ({
+    id: product.id,
+    name: product.modele,
+    brand: product.marque,
+    price: product.prixPromo || product.prixUnitaire,
+    originalPrice: product.prixPromo ? product.prixUnitaire : undefined,
+    rating: 4.5 + Math.random() * 0.5, // Note simulée
+    reviews: Math.floor(Math.random() * 300) + 50,
+    size: product.dimension,
+    features: product.caracteristiques.slice(0, 3),
+    inStock: product.enStock,
+    stockCount: product.stock,
+    isPromo: !!product.prixPromo,
+    image: tireSample
+  });
+
+  const applyFilters = (brand?: string, priceRange?: string, inStockOnly?: boolean) => {
+    let filtered = [...products];
+    
+    if (brand) {
+      filtered = filtered.filter(p => p.marque.toLowerCase() === brand.toLowerCase());
+    }
+    
+    if (priceRange) {
+      const [min, max] = priceRange.split('-').map(Number);
+      filtered = filtered.filter(p => {
+        const price = p.prixPromo || p.prixUnitaire;
+        return price >= min && (max ? price <= max : true);
+      });
+    }
+    
+    if (inStockOnly) {
+      filtered = filtered.filter(p => p.enStock);
+    }
+    
+    setFilteredProducts(filtered);
   };
 
   return (
@@ -82,7 +64,7 @@ const ProductGrid = () => {
           <div>
             <h2 className="text-3xl font-bold mb-2">Catalogue Pneus</h2>
             <p className="text-muted-foreground">
-              {sampleProducts.length} pneus disponibles • Stock temps réel
+              {filteredProducts.length} pneus disponibles • Stock temps réel
             </p>
           </div>
 
@@ -133,9 +115,13 @@ const ProductGrid = () => {
                   <div>
                     <h4 className="font-medium mb-3">Marques</h4>
                     <div className="space-y-2">
-                      {['Michelin', 'Continental', 'Bridgestone', 'Pirelli', 'Goodyear'].map((brand) => (
+                      {['Michelin', 'Continental', 'Bridgestone', 'Pirelli', 'Goodyear', 'Hankook'].map((brand) => (
                         <label key={brand} className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            onChange={(e) => applyFilters(e.target.checked ? brand : undefined)}
+                          />
                           <span className="text-sm">{brand}</span>
                         </label>
                       ))}
@@ -191,10 +177,10 @@ const ProductGrid = () => {
                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                 : 'grid-cols-1'
             }`}>
-              {sampleProducts.map((product) => (
+              {filteredProducts.map((product) => (
                 <div key={product.id} className="animate-fade-in">
                   <ProductCard 
-                    product={product} 
+                    product={convertToProductCard(product)} 
                     onAddToCart={handleAddToCart}
                   />
                 </div>
