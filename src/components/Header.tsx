@@ -19,7 +19,7 @@ const Header = () => {
               </span>
             </div>
             <div className="hidden md:flex items-center gap-4">
-              <span>Livraison gratuite dès 200€</span>
+              <span>Livraison gratuite dès 300 DT</span>
               <span>•</span>
               <span>Montage professionnel</span>
             </div>
@@ -74,8 +74,6 @@ const Header = () => {
           <div className="flex items-center justify-between">
             <div className="hidden md:flex items-center space-x-8">
               <Button variant="ghost" className="font-medium">Pneus Auto</Button>
-              <Button variant="ghost" className="font-medium">Pneus Moto</Button>
-              <Button variant="ghost" className="font-medium">Pneus Camion</Button>
               <Button variant="ghost" className="font-medium">Jantes</Button>
               <Button variant="ghost" className="font-medium">Services</Button>
               <Button variant="ghost" className="font-medium">Contact</Button>

@@ -11,8 +11,8 @@ const sampleProducts = [
     id: "1",
     name: "Michelin Pilot Sport 4",
     brand: "Michelin",
-    price: 145,
-    originalPrice: 165,
+    price: 175,
+    originalPrice: 199,
     rating: 4.8,
     reviews: 234,
     size: "205/55 R16 91V",
@@ -26,7 +26,7 @@ const sampleProducts = [
     id: "2",
     name: "Continental PremiumContact 6",
     brand: "Continental",
-    price: 132,
+    price: 159,
     rating: 4.6,
     reviews: 187,
     size: "225/45 R17 94W",
@@ -39,8 +39,8 @@ const sampleProducts = [
     id: "3",
     name: "Bridgestone Turanza T005",
     brand: "Bridgestone",
-    price: 128,
-    originalPrice: 148,
+    price: 154,
+    originalPrice: 179,
     rating: 4.5,
     reviews: 156,
     size: "195/65 R15 91H",
@@ -54,7 +54,7 @@ const sampleProducts = [
     id: "4",
     name: "Pirelli Cinturato P7",
     brand: "Pirelli",
-    price: 139,
+    price: 167,
     rating: 4.7,
     reviews: 298,
     size: "215/60 R16 95H",
@@ -148,19 +148,19 @@ const ProductGrid = () => {
                     <div className="space-y-2">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
-                        <span className="text-sm">0€ - 100€</span>
+                        <span className="text-sm">0 DT - 120 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
-                        <span className="text-sm">100€ - 150€</span>
+                        <span className="text-sm">120 DT - 180 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
-                        <span className="text-sm">150€ - 200€</span>
+                        <span className="text-sm">180 DT - 240 DT</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="rounded" />
-                        <span className="text-sm">200€+</span>
+                        <span className="text-sm">240 DT+</span>
                       </label>
                     </div>
                   </div>

@@ -22,7 +22,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/90 mb-8 animate-fade-in">
-            Stock en temps réel • Montage professionnel • Livraison gratuite dès 200€
+            Stock en temps réel • Montage professionnel • Livraison gratuite dès 300 DT
           </p>
 
           {/* Search widget */}
