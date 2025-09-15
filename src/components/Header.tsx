@@ -58,11 +58,13 @@ const Header = ({ onSearch }: HeaderProps) => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <img 
-                src="/src/assets/csp-logo.svg" 
-                alt="CSP Chahbani Star Pneus" 
-                className="h-12 md:h-16 w-auto transition-smooth hover:scale-105"
-              />
+              <Link to="/" className="block">
+                <img 
+                  src="/src/assets/csp-logo.svg" 
+                  alt="CSP Chahbani Star Pneus" 
+                  className="h-12 md:h-16 w-auto transition-smooth hover:scale-105"
+                />
+              </Link>
             </div>
 
             {/* Search bar - Desktop */}
@@ -134,10 +136,18 @@ const Header = ({ onSearch }: HeaderProps) => {
         <nav className="border-t border-border py-3">
           <div className="flex items-center justify-between">
             <div className="hidden md:flex items-center space-x-8">
-              <Button variant="ghost" className="font-medium">Pneus Auto</Button>
-              <Button variant="ghost" className="font-medium">Jantes</Button>
-              <Button variant="ghost" className="font-medium">Services</Button>
-              <Button variant="ghost" className="font-medium">Contact</Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/pneus-auto">Pneus Auto</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/jantes">Jantes</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/services">Services</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/contact">Contact</Link>
+              </Button>
             </div>
             
             {/* Mobile search */}

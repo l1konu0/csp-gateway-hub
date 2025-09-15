@@ -8,6 +8,10 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import AdminAuth from "./pages/AdminAuth";
 import NotFound from "./pages/NotFound";
+import Contact from "./pages/Contact";
+import Services from "./pages/Services";
+import PneusAuto from "./pages/PneusAuto";
+import Jantes from "./pages/Jantes";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin-auth" element={<AdminAuth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/pneus-auto" element={<PneusAuto />} />
+          <Route path="/jantes" element={<Jantes />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-success" element={<OrderSuccess />} />
