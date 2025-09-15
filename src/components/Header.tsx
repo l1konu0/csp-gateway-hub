@@ -58,9 +58,11 @@ const Header = ({ onSearch }: HeaderProps) => {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center">
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                CSP Pneu
-              </h1>
+              <img 
+                src="/src/assets/csp-logo.svg" 
+                alt="CSP Chahbani Star Pneus" 
+                className="h-12 md:h-16 w-auto transition-smooth hover:scale-105"
+              />
             </div>
 
             {/* Search bar - Desktop */}

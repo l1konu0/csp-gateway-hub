@@ -1,0 +1,22 @@
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background tire shape -->
+  <path d="M200 15 Q250 10, 290 30 Q295 35, 290 40 L280 45 Q270 50, 260 55 L250 60 Q240 70, 230 75 L220 80 Q210 85, 200 85 Q190 85, 180 80 L170 75 Q160 70, 150 60 L140 55 Q130 50, 120 45 L110 40 Q105 35, 110 30 Q150 10, 200 15 Z" fill="#1a1a1a"/>
+  
+  <!-- Inner tire details -->
+  <ellipse cx="200" cy="50" rx="40" ry="35" fill="none" stroke="white" stroke-width="2"/>
+  <ellipse cx="200" cy="50" rx="25" ry="22" fill="none" stroke="white" stroke-width="1"/>
+  
+  <!-- CSP text -->
+  <text x="10" y="45" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#c41e3a">C</text>
+  <text x="40" y="45" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#1a1a1a">S</text>
+  <text x="70" y="45" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#1a1a1a">P</text>
+  
+  <!-- Red flowing line -->
+  <path d="M10 60 Q50 55, 100 60 Q150 65, 200 60 Q250 55, 290 60" fill="none" stroke="#c41e3a" stroke-width="3"/>
+  
+  <!-- CHAHBANI text -->
+  <text x="10" y="75" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#c41e3a" letter-spacing="2px">CHAHBANI</text>
+  
+  <!-- STAR PNEUS text -->
+  <text x="120" y="75" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#1a1a1a" letter-spacing="2px">STAR PNEUS</text>
+</svg>
