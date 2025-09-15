@@ -87,3 +87,23 @@ export const usePneusSearch = (searchQuery?: string, marque?: string) => {
     },
   });
 };
+
+// Hook pour récupérer les pneus compatibles avec des dimensions spécifiques
+export const usePneusCompatibles = (dimensions: string[]) => {
+  return useQuery({
+    queryKey: ['pneus-compatibles', dimensions],
+    queryFn: async (): Promise<Pneu[]> => {
+      if (!dimensions || dimensions.length === 0) return [];
+
+      const { data, error } = await supabase
+        .from('pneus')
+        .select('*')
+        .in('dimensions', dimensions)
+        .order('marque', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: dimensions && dimensions.length > 0,
+  });
+};

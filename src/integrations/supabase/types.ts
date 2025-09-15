@@ -113,6 +113,27 @@ export type Database = {
         }
         Relationships: []
       }
+      marques_voitures: {
+        Row: {
+          created_at: string
+          id: number
+          logo_url: string | null
+          nom: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          logo_url?: string | null
+          nom: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          logo_url?: string | null
+          nom?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string | null
@@ -145,6 +166,44 @@ export type Database = {
           telephone?: string | null
         }
         Relationships: []
+      }
+      modeles_voitures: {
+        Row: {
+          annee_debut: number
+          annee_fin: number | null
+          created_at: string
+          dimensions_pneus: string[]
+          id: number
+          marque_id: number
+          nom: string
+        }
+        Insert: {
+          annee_debut: number
+          annee_fin?: number | null
+          created_at?: string
+          dimensions_pneus: string[]
+          id?: number
+          marque_id: number
+          nom: string
+        }
+        Update: {
+          annee_debut?: number
+          annee_fin?: number | null
+          created_at?: string
+          dimensions_pneus?: string[]
+          id?: number
+          marque_id?: number
+          nom?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modeles_voitures_marque_id_fkey"
+            columns: ["marque_id"]
+            isOneToOne: false
+            referencedRelation: "marques_voitures"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       panier: {
         Row: {

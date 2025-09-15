@@ -4,32 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePneusSearch } from "@/hooks/usePneus";
+import { usePneusSearch, usePneusCompatibles, Pneu } from "@/hooks/usePneus";
 import tireSample from "@/assets/tire-sample.jpg";
-
-interface Pneu {
-  id: number;
-  marque: string;
-  modele: string;
-  dimensions: string;
-  type: string;
-  prix: number;
-  stock: number;
-  description: string | null;
-  image_url: string | null;
-}
 
 interface ProductGridProps {
   searchQuery?: string;
+  compatibleDimensions?: string[];
+  selectedVehicle?: {marque: string; modele: string; annee: number} | null;
 }
 
-const ProductGrid = ({ searchQuery }: ProductGridProps) => {
+const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: ProductGridProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   
-  // Utiliser le hook de recherche au lieu de l'état local
-  const { data: products = [], isLoading: loading, error } = usePneusSearch(searchQuery, selectedBrand || undefined);
+  // Utiliser le hook approprié selon le type de recherche
+  const { data: searchProducts = [], isLoading: searchLoading, error: searchError } = usePneusSearch(searchQuery, selectedBrand || undefined);
+  const { data: compatibleProducts = [], isLoading: compatibleLoading, error: compatibleError } = usePneusCompatibles(compatibleDimensions || []);
+  
+  // Déterminer quels produits afficher et l'état de chargement
+  const products = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleProducts : searchProducts;
+  const loading = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleLoading : searchLoading;
+  const error = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleError : searchError;
 
   // Les produits sont maintenant récupérés via le hook usePneusSearch
 
@@ -93,6 +89,7 @@ const ProductGrid = ({ searchQuery }: ProductGridProps) => {
             <p className="text-muted-foreground">
               {products.length} pneus disponibles • Stock temps réel
               {searchQuery && ` • Recherche: "${searchQuery}"`}
+              {selectedVehicle && ` • Compatible avec: ${selectedVehicle.marque} ${selectedVehicle.modele} (${selectedVehicle.annee})`}
             </p>
           </div>
 
@@ -236,7 +233,12 @@ const ProductGrid = ({ searchQuery }: ProductGridProps) => {
 
             {products.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Aucun pneu trouvé avec les filtres sélectionnés.</p>
+                <p className="text-muted-foreground">
+                  {selectedVehicle 
+                    ? `Aucun pneu compatible trouvé pour votre ${selectedVehicle.marque} ${selectedVehicle.modele} (${selectedVehicle.annee}).`
+                    : 'Aucun pneu trouvé avec les filtres sélectionnés.'
+                  }
+                </p>
               </div>
             )}
 
