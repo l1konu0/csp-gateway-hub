@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Package } from 'lucide-react';
+import { Plus, Edit, Package, Save, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Pneu {
@@ -29,6 +30,17 @@ export const AdminProducts = () => {
   const queryClient = useQueryClient();
   const [editingProduct, setEditingProduct] = useState<Pneu | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    marque: '',
+    modele: '',
+    dimensions: '',
+    type: 'pneu',
+    prix: 0,
+    stock: 0,
+    description: '',
+    image_url: ''
+  });
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['admin-products'],
@@ -93,6 +105,70 @@ export const AdminProducts = () => {
     },
   });
 
+  const addProductMutation = useMutation({
+    mutationFn: async (product: typeof newProduct) => {
+      const { error } = await supabase
+        .from('pneus')
+        .insert([product]);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] }); // Invalider aussi pour le site public
+      setIsAddDialogOpen(false);
+      setNewProduct({
+        marque: '',
+        modele: '',
+        dimensions: '',
+        type: 'pneu',
+        prix: 0,
+        stock: 0,
+        description: '',
+        image_url: ''
+      });
+      toast({
+        title: "Produit ajouté",
+        description: "Le nouveau produit a été ajouté avec succès.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter le produit.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: async (product: Pneu) => {
+      const { error } = await supabase
+        .from('pneus')
+        .update(product)
+        .eq('id', product.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] }); // Invalider aussi pour le site public
+      setIsDialogOpen(false);
+      setEditingProduct(null);
+      toast({
+        title: "Produit modifié",
+        description: "Le produit a été modifié avec succès.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le produit.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStockChange = (product: Pneu, change: number) => {
     const newStock = Math.max(0, product.stock + change);
     updateStockMutation.mutate({ id: product.id, newStock });
@@ -101,6 +177,24 @@ export const AdminProducts = () => {
   const handlePriceUpdate = (productId: number, newPrice: number) => {
     if (newPrice > 0) {
       updatePriceMutation.mutate({ id: productId, newPrice });
+    }
+  };
+
+  const handleAddProduct = () => {
+    if (!newProduct.marque || !newProduct.modele || !newProduct.dimensions || newProduct.prix <= 0) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs obligatoires.",
+        variant: "destructive",
+      });
+      return;
+    }
+    addProductMutation.mutate(newProduct);
+  };
+
+  const handleUpdateProduct = () => {
+    if (editingProduct) {
+      updateProductMutation.mutate(editingProduct);
     }
   };
 
@@ -135,10 +229,132 @@ export const AdminProducts = () => {
             Gérez votre stock et vos prix
           </p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Ajouter un produit
-        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Ajouter un produit
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Ajouter un nouveau produit</DialogTitle>
+              <DialogDescription>
+                Remplissez les informations du produit à ajouter au catalogue.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Type de produit</Label>
+                <Select 
+                  value={newProduct.type} 
+                  onValueChange={(value) => setNewProduct({...newProduct, type: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner le type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pneu">Pneu</SelectItem>
+                    <SelectItem value="jante">Jante</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="marque">Marque *</Label>
+                <Input
+                  id="marque"
+                  value={newProduct.marque}
+                  onChange={(e) => setNewProduct({...newProduct, marque: e.target.value})}
+                  placeholder="Ex: Michelin, BBS..."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="modele">Modèle *</Label>
+                <Input
+                  id="modele"
+                  value={newProduct.modele}
+                  onChange={(e) => setNewProduct({...newProduct, modele: e.target.value})}
+                  placeholder="Ex: Pilot Sport, LM..."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="dimensions">Dimensions *</Label>
+                <Input
+                  id="dimensions"
+                  value={newProduct.dimensions}
+                  onChange={(e) => setNewProduct({...newProduct, dimensions: e.target.value})}
+                  placeholder="Ex: 225/45R17, 17x8 ET35..."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="prix">Prix (DT) *</Label>
+                <Input
+                  id="prix"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newProduct.prix}
+                  onChange={(e) => setNewProduct({...newProduct, prix: parseFloat(e.target.value) || 0})}
+                  placeholder="0.00"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="stock">Stock initial</Label>
+                <Input
+                  id="stock"
+                  type="number"
+                  min="0"
+                  value={newProduct.stock}
+                  onChange={(e) => setNewProduct({...newProduct, stock: parseInt(e.target.value) || 0})}
+                  placeholder="0"
+                />
+              </div>
+              
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="image_url">URL de l'image</Label>
+                <Input
+                  id="image_url"
+                  value={newProduct.image_url}
+                  onChange={(e) => setNewProduct({...newProduct, image_url: e.target.value})}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  placeholder="Description détaillée du produit..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddDialogOpen(false)}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Annuler
+              </Button>
+              <Button 
+                onClick={handleAddProduct}
+                disabled={addProductMutation.isPending}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {addProductMutation.isPending ? 'Ajout...' : 'Ajouter le produit'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
@@ -241,6 +457,123 @@ export const AdminProducts = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialog de modification */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifier le produit</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations du produit sélectionné.
+            </DialogDescription>
+          </DialogHeader>
+          {editingProduct && (
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-type">Type de produit</Label>
+                <Select 
+                  value={editingProduct.type} 
+                  onValueChange={(value) => setEditingProduct({...editingProduct, type: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pneu">Pneu</SelectItem>
+                    <SelectItem value="jante">Jante</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-marque">Marque</Label>
+                <Input
+                  id="edit-marque"
+                  value={editingProduct.marque}
+                  onChange={(e) => setEditingProduct({...editingProduct, marque: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-modele">Modèle</Label>
+                <Input
+                  id="edit-modele"
+                  value={editingProduct.modele}
+                  onChange={(e) => setEditingProduct({...editingProduct, modele: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-dimensions">Dimensions</Label>
+                <Input
+                  id="edit-dimensions"
+                  value={editingProduct.dimensions}
+                  onChange={(e) => setEditingProduct({...editingProduct, dimensions: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-prix">Prix (DT)</Label>
+                <Input
+                  id="edit-prix"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editingProduct.prix}
+                  onChange={(e) => setEditingProduct({...editingProduct, prix: parseFloat(e.target.value) || 0})}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-stock">Stock</Label>
+                <Input
+                  id="edit-stock"
+                  type="number"
+                  min="0"
+                  value={editingProduct.stock}
+                  onChange={(e) => setEditingProduct({...editingProduct, stock: parseInt(e.target.value) || 0})}
+                />
+              </div>
+              
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="edit-image_url">URL de l'image</Label>
+                <Input
+                  id="edit-image_url"
+                  value={editingProduct.image_url || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, image_url: e.target.value})}
+                />
+              </div>
+              
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingProduct.description || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})}
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          
+          <div className="flex gap-2 justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(false)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleUpdateProduct}
+              disabled={updateProductMutation.isPending}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {updateProductMutation.isPending ? 'Modification...' : 'Modifier le produit'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
