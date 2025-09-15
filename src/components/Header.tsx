@@ -87,7 +87,7 @@ const Header = ({ onSearch }: HeaderProps) => {
                   </span>
                   {isAdmin && (
                     <Button variant="outline" size="sm" asChild>
-                      <Link to="/admin">
+                      <Link to="/admin-auth">
                         <User className="h-4 w-4 mr-2" />
                         Admin
                       </Link>

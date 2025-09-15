@@ -26,7 +26,7 @@ const Admin = () => {
   }
 
   if (!user || !isAdmin) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin-auth" replace />;
   }
 
   const handleSignOut = async () => {
