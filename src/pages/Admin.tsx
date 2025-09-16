@@ -9,8 +9,9 @@ import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminUsers } from '@/components/admin/AdminUsers';
 import { AdminVehicles } from '@/components/admin/AdminVehicles';
 import { AdminMessages } from '@/components/admin/AdminMessages';
+import AdminCatalogue from '@/components/admin/AdminCatalogue';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, Package, ShoppingCart, Users, Car, MessageSquare } from 'lucide-react';
+import { LogOut, BarChart3, Package, ShoppingCart, Users, Car, MessageSquare, Layers } from 'lucide-react';
 
 const Admin = () => {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -66,10 +67,14 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="dashboard" className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
                   Tableau de bord
+                </TabsTrigger>
+                <TabsTrigger value="catalogue" className="flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
+                  Catalogue
                 </TabsTrigger>
                 <TabsTrigger value="products" className="flex items-center gap-2">
                   <Package className="h-4 w-4" />
@@ -95,6 +100,10 @@ const Admin = () => {
 
               <TabsContent value="dashboard" className="mt-6">
                 <AdminDashboard />
+              </TabsContent>
+
+              <TabsContent value="catalogue" className="mt-6">
+                <AdminCatalogue />
               </TabsContent>
 
               <TabsContent value="products" className="mt-6">
