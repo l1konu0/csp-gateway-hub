@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { usePneusSearch, usePneusCompatibles, Pneu } from "@/hooks/usePneus";
+import { useRechercherProduits, ProduitCatalogue } from "@/hooks/useCatalogue";
 import tireSample from "@/assets/tire-sample.jpg";
 
 interface ProductGridProps {
@@ -16,18 +16,13 @@ interface ProductGridProps {
 const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: ProductGridProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  // Utiliser le hook approprié selon le type de recherche
-  const { data: searchProducts = [], isLoading: searchLoading, error: searchError } = usePneusSearch(searchQuery, selectedBrand || undefined);
-  const { data: compatibleProducts = [], isLoading: compatibleLoading, error: compatibleError } = usePneusCompatibles(compatibleDimensions || []);
+  // Utiliser le nouveau hook de recherche dans le catalogue
+  const { data: products = [], isLoading: loading, error } = useRechercherProduits(searchQuery, selectedCategory || undefined);
   
-  // Déterminer quels produits afficher et l'état de chargement
-  const products = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleProducts : searchProducts;
-  const loading = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleLoading : searchLoading;
-  const error = compatibleDimensions && compatibleDimensions.length > 0 ? compatibleError : searchError;
-
-  // Les produits sont maintenant récupérés via le hook usePneusSearch
+  // Pour l'instant, on utilise tous les produits du catalogue
+  // TODO: Implémenter la compatibilité des dimensions plus tard
 
   const handleAddToCart = (productId: string) => {
     console.log("Ajouter au panier:", productId);
@@ -35,24 +30,24 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
   };
 
   // Convertir les données pour le composant ProductCard
-  const convertToProductCard = (product: Pneu) => ({
+  const convertToProductCard = (product: ProduitCatalogue) => ({
     id: product.id.toString(),
-    name: product.modele,
-    brand: product.marque,
-    price: product.prix,
+    name: product.designation.split(' ').slice(1, 4).join(' '), // Extraire le nom du produit de la désignation
+    brand: product.categories?.nom || 'Produit',
+    price: product.prix_vente,
     rating: 4.5 + Math.random() * 0.5, // Note simulée
     reviews: Math.floor(Math.random() * 300) + 50,
-    size: product.dimensions,
-    features: [product.type, 'Qualité premium', 'Garantie constructeur'],
-    inStock: product.stock > 0,
-    stockCount: product.stock,
+    size: product.designation.match(/\d+[X/]\d+R?\d+/)?.[0] || 'N/A', // Extraire les dimensions si présentes
+    features: [product.categories?.nom || 'Produit', 'Qualité premium', 'Garantie constructeur'],
+    inStock: product.stock_disponible > 0,
+    stockCount: product.stock_disponible,
     isPromo: false,
-    image: product.image_url || tireSample
+    image: tireSample // Utiliser l'image par défaut pour l'instant
   });
 
   // La fonction applyFilters n'est plus nécessaire car le filtrage est géré par le hook
 
-  const uniqueBrands = Array.from(new Set(products.map(p => p.marque))).sort();
+  const uniqueCategories = Array.from(new Set(products.map(p => p.categories?.nom).filter(Boolean))).sort();
 
   if (loading) {
     return (
@@ -140,17 +135,17 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
                   <div>
                     <h4 className="font-medium mb-3">Marques</h4>
                     <div className="space-y-2">
-                      {uniqueBrands.map((brand) => (
-                        <label key={brand} className="flex items-center gap-2 cursor-pointer">
+                      {uniqueCategories.map((category) => (
+                        <label key={category} className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox" 
                             className="rounded" 
-                            checked={selectedBrand === brand}
+                            checked={selectedCategory === category}
                             onChange={(e) => {
-                              setSelectedBrand(e.target.checked ? brand : null);
+                              setSelectedCategory(e.target.checked ? category : null);
                             }}
                           />
-                          <span className="text-sm">{brand}</span>
+                          <span className="text-sm">{category}</span>
                         </label>
                       ))}
                     </div>
