@@ -38,6 +38,92 @@ export type Database = {
         }
         Relationships: []
       }
+      catalogue_produits: {
+        Row: {
+          actif: boolean
+          categorie_id: number
+          code: number
+          coefficient: number
+          created_at: string
+          designation: string
+          id: number
+          prix_achat: number
+          prix_moyen_achat: number
+          prix_vente: number
+          stock_disponible: number
+          stock_reel: number
+          taux_tva: number
+          updated_at: string
+          valeur_stock: number
+        }
+        Insert: {
+          actif?: boolean
+          categorie_id: number
+          code: number
+          coefficient?: number
+          created_at?: string
+          designation: string
+          id?: number
+          prix_achat?: number
+          prix_moyen_achat?: number
+          prix_vente?: number
+          stock_disponible?: number
+          stock_reel?: number
+          taux_tva?: number
+          updated_at?: string
+          valeur_stock?: number
+        }
+        Update: {
+          actif?: boolean
+          categorie_id?: number
+          code?: number
+          coefficient?: number
+          created_at?: string
+          designation?: string
+          id?: number
+          prix_achat?: number
+          prix_moyen_achat?: number
+          prix_vente?: number
+          stock_disponible?: number
+          stock_reel?: number
+          taux_tva?: number
+          updated_at?: string
+          valeur_stock?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalogue_produits_categorie_id_fkey"
+            columns: ["categorie_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: number
+          nom: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          nom: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          nom?: string
+        }
+        Relationships: []
+      }
       commande_details: {
         Row: {
           commande_id: number
