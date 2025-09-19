@@ -70,7 +70,8 @@ const Checkout = () => {
           telephone: formData.telephone,
           adresse: `${formData.adresse}, ${formData.ville} ${formData.codePostal}`,
           total: finalTotal,
-          statut: 'en_attente'
+          statut: 'en_attente',
+          user_id: user.id  // Link order to authenticated user
         })
         .select()
         .single();

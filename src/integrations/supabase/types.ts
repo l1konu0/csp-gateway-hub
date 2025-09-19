@@ -177,6 +177,7 @@ export type Database = {
           telephone: string | null
           total: number
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           adresse?: string | null
@@ -191,6 +192,7 @@ export type Database = {
           telephone?: string | null
           total: number
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           adresse?: string | null
@@ -205,6 +207,7 @@ export type Database = {
           telephone?: string | null
           total?: number
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
