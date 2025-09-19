@@ -262,12 +262,12 @@ const Checkout = () => {
                         <p className="text-xs text-muted-foreground">{item.pneu.dimensions}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs">Qty: {item.quantite}</Badge>
-                          <span className="text-sm font-medium">{item.pneu.prix.toFixed(2)} DT</span>
+                          <span className="text-sm font-medium">{item.pneu.prix.toFixed(3)} TND</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-sm">
-                          {(item.pneu.prix * item.quantite).toFixed(2)} DT
+                          {(item.pneu.prix * item.quantite).toFixed(3)} TND
                         </p>
                       </div>
                     </div>
@@ -280,16 +280,16 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Sous-total</span>
-                    <span>{cartTotal.toFixed(2)} DT</span>
+                    <span>{cartTotal.toFixed(3)} TND</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison</span>
-                    <span>{shippingCost === 0 ? 'Gratuite' : `${shippingCost.toFixed(2)} DT`}</span>
+                    <span>{shippingCost === 0 ? "Gratuite" : `${shippingCost.toFixed(3)} TND`}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>{finalTotal.toFixed(2)} DT</span>
+                    <span>{finalTotal.toFixed(3)} TND</span>
                   </div>
                 </div>
 
@@ -312,7 +312,7 @@ const Checkout = () => {
                       Traitement en cours...
                     </div>
                   ) : (
-                    `Confirmer la commande - ${finalTotal.toFixed(2)} DT`
+                    `Confirmer la commande - ${finalTotal.toFixed(3)} TND`
                   )}
                 </Button>
               </CardContent>

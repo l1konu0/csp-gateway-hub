@@ -22,7 +22,7 @@ const Hero = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-white/90 mb-8 animate-fade-in">
-            Stock en temps réel • Montage professionnel • Livraison gratuite dès 300 DT
+            Stock en temps réel • Montage professionnel • Livraison gratuite dès 300 TND
           </p>
 
           {/* Search widget */}
@@ -79,7 +79,7 @@ const Hero = () => {
                 <Truck className="h-8 w-8" />
               </div>
               <h3 className="font-semibold mb-2">Livraison rapide</h3>
-              <p className="text-white/80 text-sm">24-48h partout en France</p>
+              <p className="text-white/80 text-sm">24-48h partout en Tunisie</p>
             </div>
             
             <div className="flex flex-col items-center text-center">

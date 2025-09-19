@@ -101,7 +101,7 @@ const Cart = () => {
                       </h3>
                       <p className="text-muted-foreground">{item.pneu.dimensions}</p>
                       <p className="font-semibold text-primary mt-1">
-                        {item.pneu.prix.toFixed(2)} DT
+                        {item.pneu.prix.toFixed(3)} TND
                       </p>
                     </div>
 
@@ -138,7 +138,7 @@ const Cart = () => {
                     {/* Item Total */}
                     <div className="text-right min-w-0">
                       <p className="font-semibold">
-                        {(item.pneu.prix * item.quantite).toFixed(2)} DT
+                        {(item.pneu.prix * item.quantite).toFixed(3)} TND
                       </p>
                     </div>
                   </div>
@@ -157,22 +157,22 @@ const Cart = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Sous-total</span>
-                    <span>{cartTotal.toFixed(2)} DT</span>
+                    <span>{cartTotal.toFixed(3)} TND</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison</span>
-                    <span>{cartTotal >= 300 ? 'Gratuite' : '15.00 DT'}</span>
+                    <span>{cartTotal >= 300 ? "Gratuite" : "15.000 TND"}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>{(cartTotal + (cartTotal >= 300 ? 0 : 15)).toFixed(2)} DT</span>
+                    <span>{(cartTotal + (cartTotal >= 300 ? 0 : 15)).toFixed(3)} TND</span>
                   </div>
                 </div>
 
                 {cartTotal < 300 && (
                   <div className="text-sm text-muted-foreground p-3 bg-muted rounded-lg">
-                    <p>Ajoutez {(300 - cartTotal).toFixed(2)} DT pour bénéficier de la livraison gratuite !</p>
+                    <p>Ajoutez {(300 - cartTotal).toFixed(3)} TND pour bénéficier de la livraison gratuite !</p>
                   </div>
                 )}
 

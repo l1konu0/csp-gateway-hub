@@ -161,7 +161,7 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
                           className="rounded" 
                           onChange={(e) => console.log('Filtre prix 0-120:', e.target.checked)}
                         />
-                        <span className="text-sm">0 DT - 120 DT</span>
+                        <span className="text-sm">0 TND - 120 TND</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input 
@@ -169,7 +169,7 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
                           className="rounded" 
                           onChange={(e) => console.log('Filtre prix 120-180:', e.target.checked)}
                         />
-                        <span className="text-sm">120 DT - 180 DT</span>
+                        <span className="text-sm">120 TND - 180 TND</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input 
@@ -177,7 +177,7 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
                           className="rounded" 
                           onChange={(e) => console.log('Filtre prix 180-240:', e.target.checked)}
                         />
-                        <span className="text-sm">180 DT - 240 DT</span>
+                        <span className="text-sm">180 TND - 240 TND</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input 
@@ -185,7 +185,7 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
                           className="rounded" 
                           onChange={(e) => console.log('Filtre prix 240+:', e.target.checked)}
                         />
-                        <span className="text-sm">240 DT+</span>
+                        <span className="text-sm">240 TND+</span>
                       </label>
                     </div>
                   </div>

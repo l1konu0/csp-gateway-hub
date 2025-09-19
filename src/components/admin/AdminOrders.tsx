@@ -201,7 +201,7 @@ export const AdminOrders = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">
-                        {Number(order.total).toFixed(2)} DT
+                        {Number(order.total).toFixed(3)} TND
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusBadgeVariant(order.statut)}>

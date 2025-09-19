@@ -186,8 +186,8 @@ const Contact = () => {
                     <div>
                       <h4 className="font-semibold mb-2">Adresse</h4>
                       <p className="text-muted-foreground">
-                        123 Avenue Habib Bourguiba<br />
-                        1000 Tunis, Tunisie
+                        46 Avenue Habib Bourguiba<br />
+                        2046 Sidi Thabet, Tunisie
                       </p>
                     </div>
                   </div>

@@ -85,7 +85,7 @@ const Footer = () => {
                 <MapPin className="h-5 w-5 mt-0.5 text-accent" />
                 <div>
                   <p className="text-primary-foreground/80">46 Avenue Habib Bourguiba</p>
-                  <p className="text-primary-foreground/80">2046 Tunis, Tunisie</p>
+                  <p className="text-primary-foreground/80">2046 Sidi Thabet, Tunisie</p>
                 </div>
               </div>
               

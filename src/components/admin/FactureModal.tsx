@@ -62,9 +62,9 @@ export const FactureModal: React.FC<FactureModalProps> = ({
               <h1 className="text-2xl font-bold text-primary">CSP PNEU</h1>
               <p className="text-muted-foreground">Spécialiste en pneumatiques</p>
               <p className="text-sm text-muted-foreground mt-2">
-                123 Avenue des Pneus<br />
-                75001 Paris, France<br />
-                Tél: +33 1 23 45 67 89
+                46 Avenue Habib Bourguiba<br />
+                2046 Sidi Thabet, Tunisie<br />
+                Tél: +216 70 123 456
               </p>
             </div>
             <div className="text-right">
@@ -113,10 +113,10 @@ export const FactureModal: React.FC<FactureModalProps> = ({
                       </td>
                       <td className="border border-border p-3 text-center">{detail.quantite}</td>
                       <td className="border border-border p-3 text-right">
-                        {Number(detail.prix_unitaire).toFixed(2)} DT
+                        {Number(detail.prix_unitaire).toFixed(3)} TND
                       </td>
                       <td className="border border-border p-3 text-right font-medium">
-                        {(Number(detail.prix_unitaire) * detail.quantite).toFixed(2)} DT
+                        {(Number(detail.prix_unitaire) * detail.quantite).toFixed(3)} TND
                       </td>
                     </tr>
                   ))}
@@ -131,7 +131,7 @@ export const FactureModal: React.FC<FactureModalProps> = ({
               <Separator />
               <div className="flex justify-between items-center text-lg font-bold">
                 <span>Total TTC:</span>
-                <span className="text-primary">{Number(commande.total).toFixed(2)} DT</span>
+                <span className="text-primary">{Number(commande.total).toFixed(3)} TND</span>
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@ export const FactureModal: React.FC<FactureModalProps> = ({
           {/* Informations légales */}
           <div className="text-xs text-muted-foreground border-t pt-4">
             <p>TVA non applicable, art. 293 B du CGI</p>
-            <p>Paiement à la livraison</p>
+            <p>Paiement à la livraison • Tous les prix sont en Dinars Tunisiens (TND)</p>
             <p className="mt-2">
               Cette facture a été générée automatiquement le{' '}
               {new Date(commande.date_facture).toLocaleDateString('fr-FR')} à{' '}

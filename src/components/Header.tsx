@@ -46,7 +46,7 @@ const Header = ({ onSearch }: HeaderProps) => {
               </span>
             </div>
             <div className="hidden md:flex items-center gap-4">
-              <span>Livraison gratuite dès 300 DT</span>
+              <span>Livraison gratuite dès 300 TND</span>
               <span>•</span>
               <span>Montage professionnel</span>
             </div>
