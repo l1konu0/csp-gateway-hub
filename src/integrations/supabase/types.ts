@@ -167,9 +167,12 @@ export type Database = {
         Row: {
           adresse: string | null
           created_at: string | null
+          date_facture: string | null
           email: string
+          facture_generee: boolean | null
           id: number
           nom: string
+          numero_facture: string | null
           statut: string | null
           telephone: string | null
           total: number
@@ -178,9 +181,12 @@ export type Database = {
         Insert: {
           adresse?: string | null
           created_at?: string | null
+          date_facture?: string | null
           email: string
+          facture_generee?: boolean | null
           id?: number
           nom: string
+          numero_facture?: string | null
           statut?: string | null
           telephone?: string | null
           total: number
@@ -189,9 +195,12 @@ export type Database = {
         Update: {
           adresse?: string | null
           created_at?: string | null
+          date_facture?: string | null
           email?: string
+          facture_generee?: boolean | null
           id?: number
           nom?: string
+          numero_facture?: string | null
           statut?: string | null
           telephone?: string | null
           total?: number
@@ -427,6 +436,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generer_facture_commande: {
+        Args: { commande_id: number }
+        Returns: boolean
+      }
+      generer_numero_facture: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
