@@ -1,9 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, FileText, Eye } from 'lucide-react';
+import { FactureModal } from './FactureModal';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Commande {
   id: number;
@@ -14,9 +18,17 @@ interface Commande {
   total: number;
   statut: string;
   created_at: string;
+  numero_facture: string | null;
+  date_facture: string | null;
+  facture_generee: boolean;
 }
 
 export const AdminOrders = () => {
+  const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Commande | null>(null);
+  const [invoiceDetails, setInvoiceDetails] = useState<any[]>([]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: orders, isLoading } = useQuery({
     queryKey: ['admin-orders'],
     queryFn: async () => {
@@ -29,6 +41,60 @@ export const AdminOrders = () => {
       return data as Commande[];
     },
   });
+
+  const generateInvoiceMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const { data, error } = await supabase.rpc('generer_facture_commande', {
+        commande_id: orderId
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Facture générée",
+        description: "La facture a été générée avec succès.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer la facture.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleGenerateInvoice = (orderId: number) => {
+    generateInvoiceMutation.mutate(orderId);
+  };
+
+  const handleViewInvoice = async (order: Commande) => {
+    if (!order.numero_facture) return;
+    
+    try {
+      // Récupérer les détails de la commande
+      const { data: details, error } = await supabase
+        .from('commande_details')
+        .select(`
+          *,
+          pneu:pneus(marque, modele, dimensions)
+        `)
+        .eq('commande_id', order.id);
+
+      if (error) throw error;
+
+      setInvoiceDetails(details || []);
+      setSelectedOrderForInvoice(order);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les détails de la facture.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -103,7 +169,9 @@ export const AdminOrders = () => {
                     <TableHead>Contact</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead>Facture</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -141,6 +209,22 @@ export const AdminOrders = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
+                        {order.facture_generee ? (
+                          <div className="space-y-1">
+                            <Badge variant="outline" className="text-xs">
+                              {order.numero_facture}
+                            </Badge>
+                            <p className="text-xs text-muted-foreground">
+                              {order.date_facture && new Date(order.date_facture).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            Pas de facture
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {new Date(order.created_at).toLocaleDateString('fr-FR', {
                           day: '2-digit',
                           month: '2-digit',
@@ -148,6 +232,30 @@ export const AdminOrders = () => {
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {order.facture_generee ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewInvoice(order)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleGenerateInvoice(order.id)}
+                              disabled={generateInvoiceMutation.isPending}
+                              className="h-8 w-8 p-0"
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -161,6 +269,15 @@ export const AdminOrders = () => {
           )}
         </CardContent>
       </Card>
+
+      {selectedOrderForInvoice && (
+        <FactureModal
+          isOpen={true}
+          onClose={() => setSelectedOrderForInvoice(null)}
+          commande={selectedOrderForInvoice}
+          details={invoiceDetails}
+        />
+      )}
     </div>
   );
 };
