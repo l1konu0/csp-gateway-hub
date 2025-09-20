@@ -3,77 +3,32 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart } from 'lucide-react';
+import { useProduitsParCategorie } from '@/hooks/useCatalogue';
+import { useCart } from '@/hooks/useCart';
+import { toast } from 'sonner';
 
 const Accessoires = () => {
-  const accessoires = [
-    {
-      id: 1,
-      name: "Tapis de Sol Universels",
-      brand: "WeatherTech",
-      price: "85 TND",
-      rating: 4.7,
-      image: "/images/tapis-sol.jpg",
-      description: "Tapis caoutchouc haute qualité, ajustement parfait",
-      category: "Intérieur"
-    },
-    {
-      id: 2,
-      name: "Housse de Protection Voiture",
-      brand: "Covercraft",
-      price: "120 TND",
-      rating: 4.6,
-      image: "/images/housse-voiture.jpg",
-      description: "Protection intégrale contre les intempéries",
-      category: "Extérieur"
-    },
-    {
-      id: 3,
-      name: "Kit de Nettoyage Auto",
-      brand: "Chemical Guys",
-      price: "65 TND",
-      rating: 4.8,
-      image: "/images/kit-nettoyage.jpg",
-      description: "Kit complet pour un nettoyage professionnel",
-      category: "Entretien"
-    },
-    {
-      id: 4,
-      name: "Organisateur de Coffre",
-      brand: "AutoExec",
-      price: "45 TND",
-      rating: 4.5,
-      image: "/images/organisateur-coffre.jpg",
-      description: "Rangement intelligent pour votre coffre",
-      category: "Intérieur"
-    },
-    {
-      id: 5,
-      name: "Chargeur Allume-Cigare USB",
-      brand: "Anker",
-      price: "35 TND",
-      rating: 4.9,
-      image: "/images/chargeur-usb.jpg",
-      description: "Charge rapide pour vos appareils mobiles",
-      category: "Électronique"
-    },
-    {
-      id: 6,
-      name: "Support Téléphone Magnétique",
-      brand: "Spigen",
-      price: "28 TND",
-      rating: 4.4,
-      image: "/images/support-telephone.jpg",
-      description: "Fixation magnétique sécurisée et pratique",
-      category: "Électronique"
-    }
-  ];
+  const { data: accessoires = [], isLoading } = useProduitsParCategorie('ACC');
+  const { addToCart } = useCart();
 
-  const categories = [
-    { name: "Intérieur", count: 2 },
-    { name: "Extérieur", count: 1 },
-    { name: "Entretien", count: 1 },
-    { name: "Électronique", count: 2 }
-  ];
+  const handleAddToCart = (produit: any) => {
+    // Pour les accessoires, on utilise un ID factice basé sur le code
+    const pneuId = produit.code || produit.id;
+    addToCart({ pneuId, quantite: 1 });
+    toast.success(`${produit.designation} ajouté au panier`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">Chargement des accessoires...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -94,15 +49,10 @@ const Accessoires = () => {
       {/* Categories */}
       <section className="py-8 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {categories.map((category) => (
-              <Button key={category.name} variant="outline" className="gap-2">
-                {category.name}
-                <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                  {category.count}
-                </span>
-              </Button>
-            ))}
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              {accessoires.length} accessoire(s) disponible(s)
+            </p>
           </div>
         </div>
       </section>
@@ -110,51 +60,62 @@ const Accessoires = () => {
       {/* Products Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {accessoires.map((accessoire) => (
-              <Card key={accessoire.id} className="group hover:shadow-lg transition-all duration-300 border-border">
-                <CardHeader className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img 
-                      src={accessoire.image} 
-                      alt={accessoire.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 left-2">
-                      <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                        {accessoire.category}
-                      </span>
+          {accessoires.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Aucun accessoire disponible pour le moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {accessoires.map((accessoire) => (
+                <Card key={accessoire.id} className="group hover:shadow-lg transition-all duration-300 border-border">
+                  <CardHeader className="p-0">
+                    <div className="relative overflow-hidden rounded-t-lg">
+                      <img 
+                        src="/images/accessoire-default.jpg" 
+                        alt={accessoire.designation}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                          Code: {accessoire.code}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-accent">{accessoire.brand}</span>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-muted-foreground">{accessoire.rating}</span>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-accent">Stock: {accessoire.stock_disponible}</span>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm text-muted-foreground">4.6</span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {accessoire.name}
-                  </CardTitle>
-                  
-                  <CardDescription className="mb-4">
-                    {accessoire.description}
-                  </CardDescription>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary">{accessoire.price}</span>
-                    <Button size="sm" className="gap-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      Ajouter
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                      {accessoire.designation}
+                    </CardTitle>
+                    
+                    <CardDescription className="mb-4">
+                      {accessoire.categories?.description || "Accessoire automobile de qualité"}
+                    </CardDescription>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-primary">{accessoire.prix_vente} TND</span>
+                      <Button 
+                        size="sm" 
+                        className="gap-2"
+                        onClick={() => handleAddToCart(accessoire)}
+                        disabled={accessoire.stock_disponible === 0}
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        Ajouter
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

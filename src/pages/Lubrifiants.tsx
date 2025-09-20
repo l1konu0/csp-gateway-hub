@@ -3,54 +3,32 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, ShoppingCart } from 'lucide-react';
+import { useProduitsParCategorie } from '@/hooks/useCatalogue';
+import { useCart } from '@/hooks/useCart';
+import { toast } from 'sonner';
 
 const Lubrifiants = () => {
-  const lubrifiants = [
-    {
-      id: 1,
-      name: "Huile Moteur 5W30 Synthétique",
-      brand: "Castrol",
-      price: "45 TND",
-      rating: 4.8,
-      image: "/images/huile-moteur-5w30.jpg",
-      description: "Huile moteur haute performance pour véhicules modernes",
-      viscosity: "5W30",
-      volume: "5L"
-    },
-    {
-      id: 2,
-      name: "Huile Moteur 10W40 Semi-Synthétique",
-      brand: "Shell",
-      price: "38 TND",
-      rating: 4.6,
-      image: "/images/huile-moteur-10w40.jpg",
-      description: "Protection optimale pour tous types de moteurs",
-      viscosity: "10W40",
-      volume: "4L"
-    },
-    {
-      id: 3,
-      name: "Liquide de Refroidissement",
-      brand: "Total",
-      price: "25 TND",
-      rating: 4.7,
-      image: "/images/liquide-refroidissement.jpg",
-      description: "Protection antigel longue durée",
-      viscosity: "-",
-      volume: "2L"
-    },
-    {
-      id: 4,
-      name: "Huile de Boîte de Vitesse",
-      brand: "Mobil",
-      price: "55 TND",
-      rating: 4.9,
-      image: "/images/huile-boite-vitesse.jpg",
-      description: "Lubrification optimale des transmissions",
-      viscosity: "75W90",
-      volume: "2L"
-    }
-  ];
+  const { data: lubrifiants = [], isLoading } = useProduitsParCategorie('LUBR');
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (produit: any) => {
+    // Pour les lubrifiants, on utilise un ID factice basé sur le code
+    const pneuId = produit.code || produit.id;
+    addToCart({ pneuId, quantite: 1 });
+    toast.success(`${produit.designation} ajouté au panier`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">Chargement des lubrifiants...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,57 +49,64 @@ const Lubrifiants = () => {
       {/* Products Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {lubrifiants.map((lubrifiant) => (
-              <Card key={lubrifiant.id} className="group hover:shadow-lg transition-all duration-300 border-border">
-                <CardHeader className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img 
-                      src={lubrifiant.image} 
-                      alt={lubrifiant.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-accent">{lubrifiant.brand}</span>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-muted-foreground">{lubrifiant.rating}</span>
+          {lubrifiants.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground text-lg">Aucun lubrifiant disponible pour le moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {lubrifiants.map((lubrifiant) => (
+                <Card key={lubrifiant.id} className="group hover:shadow-lg transition-all duration-300 border-border">
+                  <CardHeader className="p-0">
+                    <div className="relative overflow-hidden rounded-t-lg">
+                      <img 
+                        src="/images/huile-moteur-default.jpg" 
+                        alt={lubrifiant.designation}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-                  
-                  <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
-                    {lubrifiant.name}
-                  </CardTitle>
-                  
-                  <CardDescription className="mb-3">
-                    {lubrifiant.description}
-                  </CardDescription>
-                  
-                  <div className="space-y-1 mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Viscosité:</span>
-                      <span className="font-medium">{lubrifiant.viscosity}</span>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-accent">Code: {lubrifiant.code}</span>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm text-muted-foreground">4.7</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Volume:</span>
-                      <span className="font-medium">{lubrifiant.volume}</span>
+                    
+                    <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                      {lubrifiant.designation}
+                    </CardTitle>
+                    
+                    <CardDescription className="mb-3">
+                      {lubrifiant.categories?.description || "Lubrifiant de qualité supérieure"}
+                    </CardDescription>
+                    
+                    <div className="space-y-1 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">En stock:</span>
+                        <span className="font-medium">{lubrifiant.stock_disponible} unités</span>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-primary">{lubrifiant.price}</span>
-                    <Button size="sm" className="gap-2">
-                      <ShoppingCart className="h-4 w-4" />
-                      Ajouter
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-primary">{lubrifiant.prix_vente} TND</span>
+                      <Button 
+                        size="sm" 
+                        className="gap-2"
+                        onClick={() => handleAddToCart(lubrifiant)}
+                        disabled={lubrifiant.stock_disponible === 0}
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        Ajouter
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
