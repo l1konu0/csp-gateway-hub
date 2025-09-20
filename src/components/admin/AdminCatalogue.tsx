@@ -181,11 +181,11 @@ const AdminCatalogue = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="prix_vente">Prix de Vente (€)</Label>
+                        <Label htmlFor="prix_vente">Prix de Vente (TND)</Label>
                         <Input
                           id="prix_vente"
                           type="number"
-                          step="0.01"
+                          step="0.001"
                           value={newProduct.prix_vente}
                           onChange={(e) => setNewProduct({...newProduct, prix_vente: parseFloat(e.target.value) || 0})}
                         />
@@ -253,7 +253,7 @@ const AdminCatalogue = () => {
                     <TableCell className="max-w-xs truncate">
                       {produit.designation}
                     </TableCell>
-                    <TableCell>{produit.prix_vente.toFixed(2)} €</TableCell>
+                    <TableCell>{produit.prix_vente.toFixed(3)} TND</TableCell>
                     <TableCell>{produit.stock_disponible}</TableCell>
                     <TableCell>
                       <Badge variant={stockStatus.variant}>
@@ -300,11 +300,11 @@ const AdminCatalogue = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="edit_prix_vente">Prix de Vente (€)</Label>
+                  <Label htmlFor="edit_prix_vente">Prix de Vente (TND)</Label>
                   <Input
                     id="edit_prix_vente"
                     type="number"
-                    step="0.01"
+                    step="0.001"
                     value={editingProduct.prix_vente}
                     onChange={(e) => setEditingProduct({...editingProduct, prix_vente: parseFloat(e.target.value) || 0})}
                   />

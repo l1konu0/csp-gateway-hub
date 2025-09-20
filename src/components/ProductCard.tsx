@@ -138,11 +138,11 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         {/* Price */}
         <div className="flex items-center gap-2 mb-4">
           <span className="text-2xl font-bold text-primary">
-            {product.price} TND
+            {product.price.toFixed(3)} TND
           </span>
           {product.originalPrice && (
             <span className="text-lg text-muted-foreground line-through">
-              {product.originalPrice} TND
+              {product.originalPrice.toFixed(3)} TND
             </span>
           )}
         </div>

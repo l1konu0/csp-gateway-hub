@@ -76,7 +76,7 @@ export const AdminDashboard = () => {
   const statCards = [
     {
       title: "Chiffre d'affaires",
-      value: `${stats?.totalRevenue.toFixed(2)} DT`,
+      value: `${stats?.totalRevenue.toFixed(3)} TND`,
       description: "Total des ventes",
       icon: DollarSign,
       color: "text-green-600",

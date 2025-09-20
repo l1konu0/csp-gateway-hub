@@ -291,15 +291,15 @@ export const AdminProducts = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="prix">Prix (DT) *</Label>
+                <Label htmlFor="prix">Prix (TND) *</Label>
                 <Input
                   id="prix"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="0.001"
                   value={newProduct.prix}
                   onChange={(e) => setNewProduct({...newProduct, prix: parseFloat(e.target.value) || 0})}
-                  placeholder="0.00"
+                  placeholder="0.000"
                 />
               </div>
               
@@ -374,7 +374,7 @@ export const AdminProducts = () => {
                 <TableRow>
                   <TableHead>Produit</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Prix (DT)</TableHead>
+                  <TableHead>Prix (TND)</TableHead>
                   <TableHead>Stock</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead>Actions</TableHead>
@@ -403,7 +403,7 @@ export const AdminProducts = () => {
                           defaultValue={product.prix}
                           className="w-20"
                           min="0"
-                          step="0.01"
+                          step="0.001"
                           onBlur={(e) => {
                             const newPrice = parseFloat(e.target.value);
                             if (newPrice !== product.prix && newPrice > 0) {
@@ -513,12 +513,12 @@ export const AdminProducts = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="edit-prix">Prix (DT)</Label>
+                <Label htmlFor="edit-prix">Prix (TND)</Label>
                 <Input
                   id="edit-prix"
                   type="number"
                   min="0"
-                  step="0.01"
+                  step="0.001"
                   value={editingProduct.prix}
                   onChange={(e) => setEditingProduct({...editingProduct, prix: parseFloat(e.target.value) || 0})}
                 />
