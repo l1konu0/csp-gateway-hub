@@ -307,30 +307,30 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          pneu_id: number
+          produit_id: number
           quantite: number
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          pneu_id: number
+          produit_id: number
           quantite: number
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          pneu_id?: number
+          produit_id?: number
           quantite?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "panier_pneu_id_fkey"
-            columns: ["pneu_id"]
+            foreignKeyName: "panier_produit_id_fkey"
+            columns: ["produit_id"]
             isOneToOne: false
-            referencedRelation: "pneus"
+            referencedRelation: "catalogue_produits"
             referencedColumns: ["id"]
           },
         ]

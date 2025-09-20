@@ -81,9 +81,9 @@ const Checkout = () => {
       // Créer les détails de commande
       const commandeDetails = cartItems.map(item => ({
         commande_id: commande.id,
-        pneu_id: item.pneu_id,
-        quantite: item.quantite,
-        prix_unitaire: item.pneu.prix
+            produit_id: item.produit_id,
+            quantite: item.quantite,
+            prix_unitaire: item.produit.prix_vente
       }));
 
       const { error: detailsError } = await supabase

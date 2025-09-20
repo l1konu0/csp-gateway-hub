@@ -6,15 +6,16 @@ import { useToast } from './use-toast';
 
 export interface CartItem {
   id: string;
-  pneu_id: number;
+  produit_id: number;
   quantite: number;
-  pneu: {
+  produit: {
     id: number;
-    marque: string;
-    modele: string;
-    dimensions: string;
-    prix: number;
-    image_url: string | null;
+    designation: string;
+    prix_vente: number;
+    stock_disponible: number;
+    categories?: {
+      nom: string;
+    };
   };
 }
 
@@ -32,15 +33,16 @@ export const useCart = () => {
         .from('panier')
         .select(`
           id,
-          pneu_id,
+          produit_id,
           quantite,
-          pneus (
+          catalogue_produits (
             id,
-            marque,
-            modele,
-            dimensions,
-            prix,
-            image_url
+            designation,
+            prix_vente,
+            stock_disponible,
+            categories (
+              nom
+            )
           )
         `)
         .eq('user_id', user.id);
@@ -49,16 +51,16 @@ export const useCart = () => {
 
       return data.map(item => ({
         id: item.id,
-        pneu_id: item.pneu_id,
+        produit_id: item.produit_id,
         quantite: item.quantite,
-        pneu: item.pneus as any
+        produit: item.catalogue_produits as any
       })) as CartItem[];
     },
     enabled: !!user?.id,
   });
 
   const addToCartMutation = useMutation({
-    mutationFn: async ({ pneuId, quantite = 1 }: { pneuId: number; quantite?: number }) => {
+    mutationFn: async ({ produitId, quantite = 1 }: { produitId: number; quantite?: number }) => {
       if (!user?.id) throw new Error('Utilisateur non connecté');
 
       // Vérifier si le produit est déjà dans le panier
@@ -66,8 +68,8 @@ export const useCart = () => {
         .from('panier')
         .select('*')
         .eq('user_id', user.id)
-        .eq('pneu_id', pneuId)
-        .single();
+        .eq('produit_id', produitId)
+        .maybeSingle();
 
       if (existingItem) {
         // Mettre à jour la quantité
@@ -83,7 +85,7 @@ export const useCart = () => {
           .from('panier')
           .insert({
             user_id: user.id,
-            pneu_id: pneuId,
+            produit_id: produitId,
             quantite
           });
 
@@ -164,7 +166,7 @@ export const useCart = () => {
   });
 
   const cartTotal = cartItems.reduce((total, item) => {
-    return total + (item.pneu.prix * item.quantite);
+    return total + (item.produit.prix_vente * item.quantite);
   }, 0);
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantite, 0);

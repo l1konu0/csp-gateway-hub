@@ -49,7 +49,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       return;
     }
 
-    addToCart({ pneuId: parseInt(product.id) });
+    addToCart({ produitId: parseInt(product.id) });
   };
 
   return (
