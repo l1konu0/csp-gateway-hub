@@ -8,7 +8,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import AdminAuth from "./pages/AdminAuth";
 import NotFound from "./pages/NotFound";
-import Contact from "./pages/Contact";
+import RendezVous from "./pages/RendezVous";
 import Services from "./pages/Services";
 import PneusAuto from "./pages/PneusAuto";
 import Jantes from "./pages/Jantes";
@@ -38,7 +38,7 @@ const App = () => (
           <Route path="/accessoires" element={<Accessoires />} />
           <Route path="/pieces-detachees" element={<PiecesDetachees />} />
           <Route path="/services" element={<Services />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/rendez-vous" element={<RendezVous />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-success" element={<OrderSuccess />} />

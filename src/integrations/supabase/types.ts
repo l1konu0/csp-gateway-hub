@@ -413,6 +413,84 @@ export type Database = {
         }
         Relationships: []
       }
+      rendez_vous: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          date_rdv: string
+          email: string
+          heure_debut: string
+          heure_fin: string
+          id: string
+          nom: string
+          service: string
+          statut: string | null
+          telephone: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          date_rdv: string
+          email: string
+          heure_debut: string
+          heure_fin: string
+          id?: string
+          nom: string
+          service: string
+          statut?: string | null
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          date_rdv?: string
+          email?: string
+          heure_debut?: string
+          heure_fin?: string
+          id?: string
+          nom?: string
+          service?: string
+          statut?: string | null
+          telephone?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          actif: boolean | null
+          created_at: string
+          description: string | null
+          duree_minutes: number
+          id: string
+          nom: string
+          prix: number | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string
+          description?: string | null
+          duree_minutes?: number
+          id?: string
+          nom: string
+          prix?: number | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string
+          description?: string | null
+          duree_minutes?: number
+          id?: string
+          nom?: string
+          prix?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

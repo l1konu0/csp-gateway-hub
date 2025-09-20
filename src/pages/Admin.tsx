@@ -11,7 +11,8 @@ import { AdminVehicles } from '@/components/admin/AdminVehicles';
 import { AdminMessages } from '@/components/admin/AdminMessages';
 import AdminCatalogue from '@/components/admin/AdminCatalogue';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, Package, ShoppingCart, Users, Car, MessageSquare, Layers } from 'lucide-react';
+import { LogOut, BarChart3, Package, ShoppingCart, Users, Car, MessageSquare, Layers, Calendar } from 'lucide-react';
+import AdminRendezVous from '@/components/admin/AdminRendezVous';
 
 const Admin = () => {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -84,7 +85,11 @@ const Admin = () => {
                   <Car className="h-4 w-4" />
                   Véhicules
                 </TabsTrigger>
-                <TabsTrigger value="messages" className="flex items-center gap-2">
+            <TabsTrigger value="rendez-vous" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Rendez-vous
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   Messages
                 </TabsTrigger>
@@ -114,7 +119,11 @@ const Admin = () => {
                 <AdminVehicles />
               </TabsContent>
 
-              <TabsContent value="messages" className="mt-6">
+          <TabsContent value="rendez-vous" className="mt-6">
+            <AdminRendezVous />
+          </TabsContent>
+          
+          <TabsContent value="messages" className="mt-6">
                 <AdminMessages />
               </TabsContent>
 
