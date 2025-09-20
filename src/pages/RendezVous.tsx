@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { formatPrice } from "@/lib/utils";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { format } from "date-fns";
@@ -78,21 +79,21 @@ const RendezVous = () => {
             nom: 'Montage de pneu + valve + équilibrage',
             description: 'Montage complet des pneus avec valve neuve et équilibrage',
             duree_minutes: 45,
-            prix: 25.00
+            prix: 82.500
           },
           {
             id: 'default-2', 
             nom: 'Parallélisme',
             description: 'Réglage du parallélisme des roues',
             duree_minutes: 30,
-            prix: 35.00
+            prix: 115.500
           },
           {
             id: 'default-3',
             nom: 'Vidange',
             description: 'Vidange moteur avec filtre à huile', 
             duree_minutes: 30,
-            prix: 45.00
+            prix: 148.500
           }
         ];
         setServices(defaultServices);
@@ -107,21 +108,21 @@ const RendezVous = () => {
           nom: 'Montage de pneu + valve + équilibrage',
           description: 'Montage complet des pneus avec valve neuve et équilibrage',
           duree_minutes: 45,
-          prix: 25.00
+          prix: 82.500
         },
         {
           id: 'default-2', 
           nom: 'Parallélisme',
           description: 'Réglage du parallélisme des roues',
           duree_minutes: 30,
-          prix: 35.00
+          prix: 115.500
         },
         {
           id: 'default-3',
           nom: 'Vidange',
           description: 'Vidange moteur avec filtre à huile', 
           duree_minutes: 30,
-          prix: 45.00
+          prix: 148.500
         }
       ];
       setServices(defaultServices);
@@ -275,7 +276,7 @@ const RendezVous = () => {
                                 {service.duree_minutes}min
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                {service.prix.toFixed(2)}€
+                                {formatPrice(service.prix)}
                               </Badge>
                             </div>
                           </div>
@@ -341,7 +342,7 @@ const RendezVous = () => {
                     <SelectContent>
                       {services.map((service) => (
                         <SelectItem key={service.id} value={service.id}>
-                          {service.nom} - {service.prix.toFixed(2)}€
+                          {service.nom} - {formatPrice(service.prix)}
                         </SelectItem>
                       ))}
                     </SelectContent>
