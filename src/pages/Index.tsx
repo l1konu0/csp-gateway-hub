@@ -6,6 +6,7 @@ import BrandPartners from "@/components/BrandPartners";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
 import { VehicleSelector } from "@/components/VehicleSelector";
+import { OrderTest } from "@/components/OrderTest";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -56,6 +57,20 @@ const Index = () => {
 
       <AboutSection />
       <BrandPartners />
+      
+      {/* Test de commande - Section temporaire pour les tests */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Test du Système</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Testez le système de commande pour vous assurer que tout fonctionne correctement
+            </p>
+          </div>
+          <OrderTest />
+        </div>
+      </section>
+      
       <div id="products">
         <ProductGrid 
           searchQuery={searchQuery} 
