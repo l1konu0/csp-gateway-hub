@@ -12,6 +12,9 @@ import Contact from "./pages/Contact";
 import Services from "./pages/Services";
 import PneusAuto from "./pages/PneusAuto";
 import Jantes from "./pages/Jantes";
+import Lubrifiants from "./pages/Lubrifiants";
+import Accessoires from "./pages/Accessoires";
+import PiecesDetachees from "./pages/PiecesDetachees";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -31,6 +34,9 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/pneus-auto" element={<PneusAuto />} />
           <Route path="/jantes" element={<Jantes />} />
+          <Route path="/lubrifiants" element={<Lubrifiants />} />
+          <Route path="/accessoires" element={<Accessoires />} />
+          <Route path="/pieces-detachees" element={<PiecesDetachees />} />
           <Route path="/services" element={<Services />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />

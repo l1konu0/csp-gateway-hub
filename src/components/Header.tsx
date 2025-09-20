@@ -143,6 +143,15 @@ const Header = ({ onSearch }: HeaderProps) => {
                 <Link to="/jantes">Jantes</Link>
               </Button>
               <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/lubrifiants">Lubrifiants</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/accessoires">Accessoires</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/pieces-detachees">Pièces détachées</Link>
+              </Button>
+              <Button variant="ghost" className="font-medium" asChild>
                 <Link to="/services">Services</Link>
               </Button>
               <Button variant="ghost" className="font-medium" asChild>
