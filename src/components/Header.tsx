@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Search, Menu, Phone, User, LogOut } from "lucide-react";
+import { ShoppingCart, Search, Menu, Phone, User, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -14,6 +14,7 @@ const Header = ({ onSearch }: HeaderProps) => {
   const { user, isAdmin, signOut } = useAuth();
   const { cartCount } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +32,10 @@ const Header = ({ onSearch }: HeaderProps) => {
       // Réinitialiser la recherche si le champ est vide
       onSearch("");
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -125,8 +130,13 @@ const Header = ({ onSearch }: HeaderProps) => {
               </Button>
 
               {/* Mobile menu */}
-              <Button variant="outline" size="sm" className="md:hidden">
-                <Menu className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="md:hidden"
+                onClick={toggleMobileMenu}
+              >
+                {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -174,6 +184,78 @@ const Header = ({ onSearch }: HeaderProps) => {
             </form>
           </div>
         </nav>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-card border-t border-border">
+            <nav className="py-4 space-y-2">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/pneus-auto">Pneus Auto</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/jantes">Jantes</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/lubrifiants">Lubrifiants</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/accessoires">Accessoires</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/pieces-detachees">Pièces détachées</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/services">Services</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/rendez-vous">Prise de rendez-vous</Link>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start font-medium" 
+                asChild
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/contact">Contact</Link>
+              </Button>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );
