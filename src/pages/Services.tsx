@@ -2,7 +2,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Wrench, Award, Clock, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Services = () => {
   const services = [
@@ -83,6 +85,13 @@ const Services = () => {
                         </li>
                       ))}
                     </ul>
+                  </div>
+                  <div className="flex justify-between items-center mt-6">
+                    <Button asChild variant="outline">
+                      <Link to="/rendez-vous">
+                        Prendre rendez-vous
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
