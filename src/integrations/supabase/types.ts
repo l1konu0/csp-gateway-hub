@@ -385,7 +385,12 @@ export type Database = {
           id: string
           nom: string | null
           prenom: string | null
+          raison_sociale: string | null
+          secteur_activite: string | null
+          siret: string | null
           telephone: string | null
+          tva_intracommunautaire: string | null
+          type_compte: Database["public"]["Enums"]["type_compte"]
           updated_at: string
           ville: string | null
         }
@@ -396,7 +401,12 @@ export type Database = {
           id: string
           nom?: string | null
           prenom?: string | null
+          raison_sociale?: string | null
+          secteur_activite?: string | null
+          siret?: string | null
           telephone?: string | null
+          tva_intracommunautaire?: string | null
+          type_compte?: Database["public"]["Enums"]["type_compte"]
           updated_at?: string
           ville?: string | null
         }
@@ -407,7 +417,12 @@ export type Database = {
           id?: string
           nom?: string | null
           prenom?: string | null
+          raison_sociale?: string | null
+          secteur_activite?: string | null
+          siret?: string | null
           telephone?: string | null
+          tva_intracommunautaire?: string | null
+          type_compte?: Database["public"]["Enums"]["type_compte"]
           updated_at?: string
           ville?: string | null
         }
@@ -536,6 +551,10 @@ export type Database = {
         Args: { user_id?: string }
         Returns: boolean
       }
+      is_societe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       promote_user_to_admin: {
         Args: { user_email: string }
         Returns: boolean
@@ -543,6 +562,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "client"
+      type_compte: "particulier" | "societe"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -671,6 +691,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "client"],
+      type_compte: ["particulier", "societe"],
     },
   },
 } as const

@@ -10,6 +10,11 @@ export interface UserProfile {
   adresse: string | null;
   ville: string | null;
   code_postal: string | null;
+  type_compte: 'particulier' | 'societe';
+  raison_sociale: string | null;
+  siret: string | null;
+  tva_intracommunautaire: string | null;
+  secteur_activite: string | null;
 }
 
 export interface AuthState {
@@ -120,6 +125,20 @@ export const useAuth = () => {
     return { error };
   };
 
+  const signUpSociete = async (email: string, password: string, metadata?: any) => {
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: { ...metadata, type_compte: 'societe' }
+      }
+    });
+    return { error };
+  };
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -154,6 +173,7 @@ export const useAuth = () => {
   return {
     ...state,
     signUp,
+    signUpSociete,
     signIn,
     signOut,
     updateProfile,
