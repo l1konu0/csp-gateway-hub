@@ -88,8 +88,8 @@ const Cart = () => {
                     {/* Product Image */}
                     <div className="flex-shrink-0">
                       <img
-                        src={item.pneu.image_url || '/placeholder.svg'}
-                        alt={`${item.pneu.marque} ${item.pneu.modele}`}
+                        src={item.produit.categories?.nom === 'Pneus' ? '/placeholder.svg' : '/placeholder.svg'}
+                        alt={item.produit.designation}
                         className="w-20 h-20 object-cover rounded-lg"
                       />
                     </div>
@@ -97,11 +97,11 @@ const Cart = () => {
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-lg">
-                        {item.pneu.marque} {item.pneu.modele}
+                        {item.produit.designation}
                       </h3>
-                      <p className="text-muted-foreground">{item.pneu.dimensions}</p>
+                      <p className="text-muted-foreground">Stock: {item.produit.stock_disponible}</p>
                       <p className="font-semibold text-primary mt-1">
-                        {item.pneu.prix.toFixed(3)} TND
+                        {item.produit.prix_vente.toFixed(3)} TND
                       </p>
                     </div>
 
@@ -138,7 +138,7 @@ const Cart = () => {
                     {/* Item Total */}
                     <div className="text-right min-w-0">
                       <p className="font-semibold">
-                        {(item.pneu.prix * item.quantite).toFixed(3)} TND
+                        {(item.produit.prix_vente * item.quantite).toFixed(3)} TND
                       </p>
                     </div>
                   </div>

@@ -12,9 +12,9 @@ const Accessoires = () => {
   const { addToCart } = useCart();
 
   const handleAddToCart = (produit: any) => {
-    // Pour les accessoires, on utilise un ID factice basé sur le code
-    const pneuId = produit.code || produit.id;
-    addToCart({ pneuId, quantite: 1 });
+    // Pour les accessoires, on utilise l'ID du produit
+    const produitId = produit.id;
+    addToCart({ produitId, quantite: 1 });
     toast.success(`${produit.designation} ajouté au panier`);
   };
 

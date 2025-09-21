@@ -252,23 +252,23 @@ const Checkout = () => {
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                       <img
-                        src={item.pneu.image_url || '/placeholder.svg'}
-                        alt={`${item.pneu.marque} ${item.pneu.modele}`}
+                        src={item.produit.categories?.nom === 'Pneus' ? '/placeholder.svg' : '/placeholder.svg'}
+                        alt={item.produit.designation}
                         className="w-12 h-12 object-cover rounded"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">
-                          {item.pneu.marque} {item.pneu.modele}
+                          {item.produit.designation}
                         </p>
-                        <p className="text-xs text-muted-foreground">{item.pneu.dimensions}</p>
+                        <p className="text-xs text-muted-foreground">Stock: {item.produit.stock_disponible}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className="text-xs">Qty: {item.quantite}</Badge>
-                          <span className="text-sm font-medium">{item.pneu.prix.toFixed(3)} TND</span>
+                          <span className="text-sm font-medium">{item.produit.prix_vente.toFixed(3)} TND</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-sm">
-                          {(item.pneu.prix * item.quantite).toFixed(3)} TND
+                          {(item.produit.prix_vente * item.quantite).toFixed(3)} TND
                         </p>
                       </div>
                     </div>

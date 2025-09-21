@@ -128,22 +128,22 @@ export type Database = {
         Row: {
           commande_id: number
           id: number
-          pneu_id: number
           prix_unitaire: number
+          produit_id: number
           quantite: number
         }
         Insert: {
           commande_id: number
           id?: number
-          pneu_id: number
           prix_unitaire: number
+          produit_id: number
           quantite: number
         }
         Update: {
           commande_id?: number
           id?: number
-          pneu_id?: number
           prix_unitaire?: number
+          produit_id?: number
           quantite?: number
         }
         Relationships: [
@@ -155,10 +155,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "commande_details_pneu_id_fkey"
-            columns: ["pneu_id"]
+            foreignKeyName: "commande_details_produit_id_fkey"
+            columns: ["produit_id"]
             isOneToOne: false
-            referencedRelation: "pneus"
+            referencedRelation: "catalogue_produits"
             referencedColumns: ["id"]
           },
         ]
