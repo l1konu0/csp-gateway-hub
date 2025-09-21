@@ -167,6 +167,9 @@ const Header = ({ onSearch }: HeaderProps) => {
               <Button variant="ghost" className="font-medium" asChild>
                 <Link to="/rendez-vous">Prise de rendez-vous</Link>
               </Button>
+              <Button variant="ghost" className="font-medium" asChild>
+                <Link to="/contact">Contact</Link>
+              </Button>
             </div>
             
             {/* Mobile search */}

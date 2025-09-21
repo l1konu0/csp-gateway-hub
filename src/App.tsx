@@ -15,6 +15,7 @@ import Jantes from "./pages/Jantes";
 import Lubrifiants from "./pages/Lubrifiants";
 import Accessoires from "./pages/Accessoires";
 import PiecesDetachees from "./pages/PiecesDetachees";
+import Contact from "./pages/Contact";
 import Cart from "./components/Cart";
 import Checkout from "./components/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/pieces-detachees" element={<PiecesDetachees />} />
           <Route path="/services" element={<Services />} />
           <Route path="/rendez-vous" element={<RendezVous />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-success" element={<OrderSuccess />} />

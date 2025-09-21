@@ -1,44 +1,37 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    nom: '',
-    email: '',
-    telephone: '',
-    sujet: '',
-    message: ''
+    nom: "",
+    email: "",
+    telephone: "",
+    sujet: "",
+    message: ""
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.nom || !formData.email || !formData.message) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs obligatoires",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       const { error } = await supabase
@@ -48,26 +41,26 @@ const Contact = () => {
       if (error) throw error;
 
       toast({
-        title: "Message envoyé !",
-        description: "Nous vous répondrons dans les plus brefs délais.",
+        title: "Message envoyé",
+        description: "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
       });
 
-      // Reset form
       setFormData({
-        nom: '',
-        email: '',
-        telephone: '',
-        sujet: '',
-        message: ''
+        nom: "",
+        email: "",
+        telephone: "",
+        sujet: "",
+        message: ""
       });
     } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'envoyer le message. Veuillez réessayer.",
-        variant: "destructive"
+        description: "Une erreur est survenue lors de l'envoi de votre message.",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -75,32 +68,108 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-primary py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+      <main className="container mx-auto px-4 py-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Contactez-nous
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            Une question ? Besoin de conseils ? Notre équipe d'experts est là pour vous aider.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Notre équipe d'experts est à votre disposition pour répondre à toutes vos questions
           </p>
         </div>
-      </section>
 
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            {/* Formulaire de contact */}
+        <div className="grid lg:grid-cols-2 gap-12">
+          {/* Informations de contact */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Notre magasin
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-foreground">CSP Chahbani Star Pneus</h3>
+                  <p className="text-muted-foreground">
+                    Route de Gabès, Km 1<br />
+                    3000 Sfax, Tunisie
+                  </p>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <Phone className="h-5 w-5 text-primary mt-1" />
+                  <div>
+                    <p className="font-medium">+216 74 123 456</p>
+                    <p className="text-sm text-muted-foreground">Ligne directe magasin</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Mail className="h-5 w-5 text-primary mt-1" />
+                  <div>
+                    <p className="font-medium">contact@csppneu.tn</p>
+                    <p className="text-sm text-muted-foreground">Email commercial</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Clock className="h-5 w-5 text-primary mt-1" />
+                  <div>
+                    <p className="font-medium">Horaires d'ouverture</p>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>Lundi - Vendredi: 8h00 - 18h00</p>
+                      <p>Samedi: 8h00 - 16h00</p>
+                      <p>Dimanche: Fermé</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Carte Google Maps */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Localisation</CardTitle>
+                <CardDescription>
+                  Trouvez-nous facilement grâce à cette carte interactive
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-video w-full rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3288.9899775!2d10.760843476414!3d34.739564872880!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13002d2b1b8b7b7b%3A0x7b8b7b7b7b7b7b7b!2sSfax%2C%20Tunisia!5e0!3m2!1sen!2s!4v1635789012345!5m2!1sen!2s"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Localisation CSP Chahbani Star Pneus"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground mt-3">
+                  Parking gratuit disponible devant le magasin
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Formulaire de contact */}
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Send className="h-5 w-5 text-primary" />
                   Envoyez-nous un message
                 </CardTitle>
+                <CardDescription>
+                  Remplissez ce formulaire et nous vous répondrons rapidement
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="nom">Nom complet *</Label>
@@ -114,40 +183,40 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="votre@email.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
                       <Label htmlFor="telephone">Téléphone</Label>
                       <Input
                         id="telephone"
                         name="telephone"
+                        type="tel"
                         value={formData.telephone}
                         onChange={handleInputChange}
                         placeholder="+216 XX XXX XXX"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="sujet">Sujet</Label>
-                      <Input
-                        id="sujet"
-                        name="sujet"
-                        value={formData.sujet}
-                        onChange={handleInputChange}
-                        placeholder="Objet de votre message"
-                      />
-                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="votre.email@exemple.com"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="sujet">Sujet</Label>
+                    <Input
+                      id="sujet"
+                      name="sujet"
+                      value={formData.sujet}
+                      onChange={handleInputChange}
+                      placeholder="Ex: Devis pour pneus, Prise de rendez-vous..."
+                    />
                   </div>
 
                   <div>
@@ -157,111 +226,55 @@ const Contact = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
-                      placeholder="Décrivez votre demande..."
+                      placeholder="Décrivez votre demande en détail..."
                       rows={5}
                       required
                     />
                   </div>
 
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-gradient-primary hover:opacity-90"
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isSubmitting}
                   >
-                    {isLoading ? 'Envoi en cours...' : 'Envoyer le message'}
+                    {isSubmitting ? (
+                      <>Envoi en cours...</>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Envoyer le message
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>
             </Card>
 
-            {/* Informations de contact */}
-            <div className="space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Nos coordonnées</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold mb-2">Adresse</h4>
-                      <p className="text-muted-foreground">
-                        46 Avenue Habib Bourguiba<br />
-                        2046 Sidi Thabet, Tunisie
-                      </p>
-                    </div>
+            {/* Informations supplémentaires */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Services d'urgence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-foreground">Dépannage 24h/24</p>
+                    <p className="text-sm text-muted-foreground">
+                      Pour les urgences : +216 98 123 456
+                    </p>
                   </div>
-
-                  <div className="flex items-start gap-4">
-                    <Phone className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold mb-2">Téléphone</h4>
-                      <p className="text-muted-foreground">
-                        +216 71 XXX XXX<br />
-                        +216 98 XXX XXX (Mobile)
-                      </p>
-                    </div>
+                  <div>
+                    <p className="font-medium text-foreground">Intervention rapide</p>
+                    <p className="text-sm text-muted-foreground">
+                      Service de remorquage et réparation sur place
+                    </p>
                   </div>
-
-                  <div className="flex items-start gap-4">
-                    <Mail className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold mb-2">Email</h4>
-                      <p className="text-muted-foreground">
-                        contact@csp-pneus.tn<br />
-                        commercial@csp-pneus.tn
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold mb-2">Horaires d'ouverture</h4>
-                      <div className="text-muted-foreground space-y-1">
-                        <p>Lundi - Vendredi : 8h00 - 18h00</p>
-                        <p>Samedi : 8h00 - 16h00</p>
-                        <p>Dimanche : Fermé</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Carte ou informations supplémentaires */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pourquoi nous choisir ?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>Plus de 25 ans d'expérience</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>Équipe d'experts certifiés</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>Service de montage professionnel</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>Garantie sur tous nos produits</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>Livraison rapide en Tunisie</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </section>
+      </main>
 
       <Footer />
     </div>
