@@ -22,10 +22,13 @@ interface FactureModalProps {
     id: number;
     quantite: number;
     prix_unitaire: number;
-    pneu: {
-      marque: string;
-      modele: string;
-      dimensions: string;
+    produit: {
+      id: number;
+      designation: string;
+      prix_vente: number;
+      categories?: {
+        nom: string;
+      };
     };
   }>;
 }
@@ -177,7 +180,7 @@ export const FactureModal: React.FC<FactureModalProps> = ({
                   <tr key={detail.id}>
                     <td className="border border-gray-300 p-3 bg-white text-center">{detail.id}</td>
                     <td className="border border-gray-300 p-3 bg-white text-left">
-                      PNEU {detail.pneu.dimensions} {detail.pneu.marque} {detail.pneu.modele}
+                      {detail.produit.designation}
                     </td>
                     <td className="border border-gray-300 p-3 bg-white text-center">{detail.quantite}</td>
                     <td className="border border-gray-300 p-3 bg-white text-center">{puHT.toFixed(3)}</td>

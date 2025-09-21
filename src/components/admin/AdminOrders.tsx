@@ -25,7 +25,19 @@ interface Commande {
 
 export const AdminOrders = () => {
   const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Commande | null>(null);
-  const [invoiceDetails, setInvoiceDetails] = useState<any[]>([]);
+  const [invoiceDetails, setInvoiceDetails] = useState<Array<{
+    id: number;
+    quantite: number;
+    prix_unitaire: number;
+    produit: {
+      id: number;
+      designation: string;
+      prix_vente: number;
+      categories?: {
+        nom: string;
+      };
+    };
+  }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -79,7 +91,7 @@ export const AdminOrders = () => {
         .from('commande_details')
         .select(`
           *,
-          pneu:pneus(marque, modele, dimensions)
+          produit:catalogue_produits(id, designation, prix_vente, categories(nom))
         `)
         .eq('commande_id', order.id);
 
