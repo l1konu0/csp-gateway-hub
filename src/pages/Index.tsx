@@ -14,7 +14,8 @@ const Index = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<{marque: string; modele: string; annee: number} | null>(null);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(query.trim().toLowerCase());
+
     setCompatibleDimensions([]); // Reset vehicle search
     setSelectedVehicle(null);
     // Faire défiler vers les produits si une recherche est effectuée
