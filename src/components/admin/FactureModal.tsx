@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Printer } from 'lucide-react';
-import cspLogo from '@/assets/csp-logo.svg';
+import cspLogo from '@/assets/csp-logo-new.jpg';
 
 interface FactureModalProps {
   isOpen: boolean;

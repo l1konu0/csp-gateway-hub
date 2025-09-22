@@ -65,7 +65,7 @@ const Header = ({ onSearch }: HeaderProps) => {
             <div className="flex items-center">
               <Link to="/" className="block">
                 <img 
-                  src="/src/assets/csp-logo.svg" 
+                  src="/src/assets/csp-logo-new.jpg" 
                   alt="CSP Chahbani Star Pneus" 
                   className="h-12 md:h-16 w-auto transition-smooth hover:scale-105"
                 />
