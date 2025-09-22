@@ -89,31 +89,53 @@ export const FactureModal: React.FC<FactureModalProps> = ({
         {/* Styles CSS intégrés pour l'impression */}
         <style>{`
           @media print {
-            body, .page {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-              background: #E5E5E5 !important;
-              box-shadow: none;
-            }
-            .totals-box, table.items th, .header {
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            button {
-              display: none;
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
             body, html {
-              margin: 0;
-              padding: 0;
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #fff !important;
             }
             .page {
-              margin: 0;
-              padding: 20mm;
-              width: 210mm;
-              min-height: auto;
-              box-shadow: none;
-              page-break-after: avoid;
-              page-break-inside: avoid;
+              margin: 0 !important;
+              padding: 20mm !important;
+              width: 210mm !important;
+              min-height: auto !important;
+              background: #E5E5E5 !important;
+              box-shadow: none !important;
+              border-radius: 0 !important;
+              page-break-after: avoid !important;
+              page-break-inside: avoid !important;
+            }
+            .header {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .totals-box, table.items th {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            table.items th {
+              background: #cc0000 !important;
+              color: white !important;
+            }
+            .totals-box tr:last-child td {
+              background: #cc0000 !important;
+              color: white !important;
+            }
+            button, .print\\:hidden {
+              display: none !important;
+            }
+            /* Force tous les éléments à garder leurs couleurs */
+            .header, .header *, 
+            .details, .details *,
+            .items, .items *,
+            .totals-box, .totals-box *,
+            .amount-words, .footer {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
           }
           
