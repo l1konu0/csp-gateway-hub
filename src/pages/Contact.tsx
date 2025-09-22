@@ -93,23 +93,24 @@ const Contact = () => {
                 <div>
                   <h3 className="font-semibold text-foreground">CSP Chahbani Star Pneus</h3>
                   <p className="text-muted-foreground">
-                    Route de Gabès, Km 1<br />
-                    3000 Sfax, Tunisie
+                    46 Avenue Habib Bourguiba<br />
+                    2046 Ain Zaghouane, Tunis
                   </p>
                 </div>
                 
                 <div className="flex items-start gap-3">
                   <Phone className="h-5 w-5 text-primary mt-1" />
                   <div>
-                    <p className="font-medium">+216 74 123 456</p>
-                    <p className="text-sm text-muted-foreground">Ligne directe magasin</p>
+                    <p className="font-medium">GSM: 98 215 559 / 20 215 559</p>
+                    <p className="font-medium">TEL/FAX: 75 760 925</p>
+                    <p className="text-sm text-muted-foreground">Lignes directes magasin</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Mail className="h-5 w-5 text-primary mt-1" />
                   <div>
-                    <p className="font-medium">contact@csppneu.tn</p>
+                    <p className="font-medium">chahbanistarpneus4@gmail.com</p>
                     <p className="text-sm text-muted-foreground">Email commercial</p>
                   </div>
                 </div>
@@ -260,7 +261,7 @@ const Contact = () => {
                   <div>
                     <p className="font-medium text-foreground">Dépannage 24h/24</p>
                     <p className="text-sm text-muted-foreground">
-                      Pour les urgences : +216 98 123 456
+                      Pour les urgences : 98 215 559
                     </p>
                   </div>
                   <div>

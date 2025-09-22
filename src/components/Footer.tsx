@@ -85,18 +85,21 @@ const Footer = () => {
                 <MapPin className="h-5 w-5 mt-0.5 text-accent" />
                 <div>
                   <p className="text-primary-foreground/80">46 Avenue Habib Bourguiba</p>
-                  <p className="text-primary-foreground/80">2046 Sidi Thabet, Tunisie</p>
+                  <p className="text-primary-foreground/80">2046 Ain Zaghouane, Tunis</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/80">+216 71 123 456</p>
+                <div>
+                  <p className="text-primary-foreground/80">GSM: 98 215 559 / 20 215 559</p>
+                  <p className="text-primary-foreground/80">TEL/FAX: 75 760 925</p>
+                </div>
               </div>
               
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-accent" />
-                <p className="text-primary-foreground/80">contact@csp-pneu.tn</p>
+                <p className="text-primary-foreground/80">chahbanistarpneus4@gmail.com</p>
               </div>
               
               <div className="flex items-start gap-3">
