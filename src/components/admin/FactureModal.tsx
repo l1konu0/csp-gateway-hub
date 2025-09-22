@@ -157,17 +157,34 @@ export const FactureModal: React.FC<FactureModalProps> = ({
           }
 
           .header { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            border-bottom: 3px solid #cc0000; 
-            padding-bottom: 10px; 
-            margin-bottom: 20px; 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: space-between !important; 
+            border-bottom: 3px solid #cc0000 !important; 
+            padding-bottom: 10px !important; 
+            margin-bottom: 20px !important; 
           }
-          .header img { height: 180px; }
-          .header .company { text-align: right; color: #333; }
-          .header h1 { margin: 0; font-size: 24px; font-weight: bold; color: #cc0000; }
-          .header .info { font-size: 12px; margin-top: 5px; line-height: 1.5; }
+          .header img { 
+            height: 180px !important; 
+            max-height: 180px !important;
+            width: auto !important;
+            display: block !important;
+          }
+          .header .company { 
+            text-align: right !important; 
+            color: #333 !important; 
+          }
+          .header h1 { 
+            margin: 0 !important; 
+            font-size: 24px !important; 
+            font-weight: bold !important; 
+            color: #cc0000 !important; 
+          }
+          .header .info { 
+            font-size: 12px !important; 
+            margin-top: 5px !important; 
+            line-height: 1.5 !important; 
+          }
 
           .invoice-title { 
             text-align: center; 
