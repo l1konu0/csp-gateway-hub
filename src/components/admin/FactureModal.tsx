@@ -2,7 +2,6 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Printer } from 'lucide-react';
-import cspLogo from '@/assets/csp-logo-clean.png';
 
 interface FactureModalProps {
   isOpen: boolean;
@@ -244,7 +243,7 @@ export const FactureModal: React.FC<FactureModalProps> = ({
         <div className="page" id="facture-content">
           {/* HEADER */}
           <div className="header">
-            <img src={cspLogo} alt="Logo CSP" />
+            <img src="/logo-csp.png" alt="Logo CSP" />
             <div className="company">
               <h1>CHAHBANI STAR PNEU</h1>
               <div className="info">
