@@ -27,7 +27,77 @@ const ImportData = () => {
     return category?.id || null;
   };
 
-  // Fonction pour parser une ligne de données SQL
+  // Fonction pour convertir une ligne CSV en produit
+  const parseCSVToProduct = (csvRow: any) => {
+    // Mapping flexible des colonnes CSV vers les champs de la base
+    const code = parseInt(csvRow.code || csvRow.col0 || csvRow['Code'] || '0');
+    const famille = csvRow.famille || csvRow.col1 || csvRow['Famille'] || csvRow['Code Famille'] || '';
+    const designation = csvRow.designation || csvRow.col2 || csvRow['Désignation'] || csvRow['Designation'] || '';
+    const stockReel = parseInt(csvRow.stock_reel || csvRow.col3 || csvRow['Stock Réel'] || csvRow['Stock Reel'] || '0');
+    const stockDispo = parseInt(csvRow.stock_disponible || csvRow.col4 || csvRow['Stock Disponible'] || '0');
+    const prixAchat = parseFloat(csvRow.prix_achat || csvRow.col5 || csvRow['Prix Achat'] || '0');
+    const pamp = parseFloat(csvRow.prix_moyen_achat || csvRow.col6 || csvRow['Prix Moyen Achat'] || csvRow['PAMP'] || '0');
+    const prixVente = parseFloat(csvRow.prix_vente || csvRow.col7 || csvRow['Prix Vente'] || '0');
+    const valeurStock = parseFloat(csvRow.valeur_stock || csvRow.col8 || csvRow['Valeur Stock'] || '0');
+    const tauxTva = parseInt(csvRow.taux_tva || csvRow.col9 || csvRow['Taux TVA'] || '19');
+    const coef = parseFloat(csvRow.coefficient || csvRow.col10 || csvRow['Coefficient'] || '1');
+
+    if (!code || !famille || !designation) {
+      return null;
+    }
+
+    const categorieId = getCategoryId(famille);
+    if (!categorieId) {
+      console.warn(`Catégorie non trouvée pour le code: ${famille}`);
+      return null;
+    }
+
+    return {
+      code,
+      categorie_id: categorieId,
+      designation: designation.replace(/"/g, ''), // Nettoyer les guillemets
+      stock_reel: stockReel,
+      stock_disponible: stockDispo,
+      prix_achat: prixAchat,
+      prix_moyen_achat: pamp,
+      prix_vente: prixVente,
+      valeur_stock: valeurStock,
+      taux_tva: tauxTva,
+      coefficient: coef,
+      actif: true
+    };
+  };
+
+  // Fonction pour parser une ligne CSV
+  const parseCSVLine = (line: string, headers: string[]) => {
+    // Parser CSV simple qui gère les virgules dans les guillemets
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current.trim());
+    
+    // Créer un objet avec les headers comme clés
+    const row: any = {};
+    headers.forEach((header, index) => {
+      row[header] = values[index] || '';
+    });
+    
+    return row;
+  };
+
+  // Fonction pour parser une ligne de données SQL (gardée pour compatibilité)
   const parseSQLLine = (line: string) => {
     // Regex pour extraire les valeurs d'un INSERT
     const match = line.match(/\((\d+),\s*'([^']+)',\s*'([^']+)',\s*(\d+),\s*(\d+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*([\d.]+),\s*(\d+),\s*([\d.]+)\)/);
@@ -65,18 +135,31 @@ const ImportData = () => {
 
     try {
       const text = await file.text();
-      const lines = text.split('\n');
+      const lines = text.split('\n').filter(line => line.trim() !== '');
       
-      // Filtrer les lignes INSERT pour liste_stock
-      const insertLines = lines.filter(line => 
-        line.trim().startsWith('INSERT INTO `liste_stock`') ||
-        line.trim().match(/^\(\d+,/)
-      );
+      let isCSV = false;
+      let headers: string[] = [];
+      let dataLines: string[] = [];
 
-      if (insertLines.length === 0) {
+      // Détecter le type de fichier
+      if (file.name.toLowerCase().endsWith('.csv')) {
+        isCSV = true;
+        // Parser la première ligne pour obtenir les headers
+        const firstLineValues = parseCSVLine(lines[0], []);
+        headers = firstLineValues.map((_, i) => `col${i}`);
+        dataLines = lines.slice(1);
+      } else {
+        // Fichier SQL - garder l'ancienne logique
+        dataLines = lines.filter(line => 
+          line.trim().startsWith('INSERT INTO `liste_stock`') ||
+          line.trim().match(/^\(\d+,/)
+        );
+      }
+
+      if (dataLines.length === 0) {
         toast({
           title: "Erreur",
-          description: "Aucune donnée d'insertion trouvée dans le fichier",
+          description: isCSV ? "Aucune donnée trouvée dans le fichier CSV" : "Aucune donnée d'insertion trouvée dans le fichier SQL",
           variant: "destructive",
         });
         return;
@@ -84,17 +167,27 @@ const ImportData = () => {
 
       let successCount = 0;
       let errorCount = 0;
-      const total = insertLines.length;
+      const total = dataLines.length;
 
       // Traiter les données par batches pour éviter de surcharger la base
       const batchSize = 50;
       
-      for (let i = 0; i < insertLines.length; i += batchSize) {
-        const batch = insertLines.slice(i, i + batchSize);
+      for (let i = 0; i < dataLines.length; i += batchSize) {
+        const batch = dataLines.slice(i, i + batchSize);
         const productsToInsert = [];
 
         for (const line of batch) {
-          const product = parseSQLLine(line);
+          let product = null;
+          
+          if (isCSV) {
+            // Parser CSV
+            const csvRow = parseCSVLine(line, headers);
+            product = parseCSVToProduct(csvRow);
+          } else {
+            // Parser SQL
+            product = parseSQLLine(line);
+          }
+          
           if (product) {
             productsToInsert.push(product);
           }
@@ -163,18 +256,18 @@ const ImportData = () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Utilisez cette fonction pour importer vos produits depuis votre fichier SQL. 
-            Le système recherchera automatiquement les lignes INSERT pour la table liste_stock.
+            Utilisez cette fonction pour importer vos produits depuis un fichier CSV ou SQL. 
+            Pour les fichiers CSV, assurez-vous que les colonnes contiennent : Code, Famille, Désignation, Stock Réel, Stock Disponible, Prix Achat, Prix Moyen Achat, Prix Vente, Valeur Stock, Taux TVA, Coefficient.
           </AlertDescription>
         </Alert>
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="sql-file">Fichier SQL à importer</Label>
+            <Label htmlFor="import-file">Fichier à importer (CSV, SQL, TXT)</Label>
             <Input
-              id="sql-file"
+              id="import-file"
               type="file"
-              accept=".sql,.txt"
+              accept=".csv,.sql,.txt"
               onChange={handleFileImport}
               disabled={isImporting}
               className="mt-2"
@@ -212,11 +305,12 @@ const ImportData = () => {
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-medium mb-2">Instructions d'utilisation:</h4>
           <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
-            <li>Sélectionnez votre fichier SQL contenant les données liste_stock</li>
-            <li>Le système détectera automatiquement les lignes d'insertion</li>
+            <li><strong>Pour les fichiers CSV :</strong> Assurez-vous que la première ligne contient les en-têtes de colonnes</li>
+            <li><strong>Pour les fichiers SQL :</strong> Le système détectera automatiquement les lignes d'insertion</li>
             <li>Les produits seront mappés aux bonnes catégories (FA0001-FA0006)</li>
             <li>L'import se fait par batches pour optimiser les performances</li>
             <li>Les doublons seront automatiquement remplacés</li>
+            <li><strong>Format CSV attendu :</strong> Code, Famille, Désignation, Stock Réel, Stock Disponible, Prix Achat, Prix Moyen Achat, Prix Vente, Valeur Stock, Taux TVA, Coefficient</li>
           </ol>
         </div>
       </CardContent>

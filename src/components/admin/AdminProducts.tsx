@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Package, Save, X } from 'lucide-react';
+import { Plus, Edit, Package, Save, X, Trash2, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Pneu {
@@ -31,6 +31,8 @@ export const AdminProducts = () => {
   const [editingProduct, setEditingProduct] = useState<Pneu | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [showOnlyOutOfStock, setShowOnlyOutOfStock] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Pneu | null>(null);
   const [newProduct, setNewProduct] = useState({
     marque: '',
     modele: '',
@@ -169,6 +171,33 @@ export const AdminProducts = () => {
     },
   });
 
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      const { error } = await supabase
+        .from('pneus')
+        .delete()
+        .eq('id', productId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] }); // Invalider aussi pour le site public
+      setProductToDelete(null);
+      toast({
+        title: "Produit supprimé",
+        description: "Le produit a été supprimé avec succès.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le produit.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStockChange = (product: Pneu, change: number) => {
     const newStock = Math.max(0, product.stock + change);
     updateStockMutation.mutate({ id: product.id, newStock });
@@ -197,6 +226,20 @@ export const AdminProducts = () => {
       updateProductMutation.mutate(editingProduct);
     }
   };
+
+  const handleDeleteProduct = () => {
+    if (productToDelete) {
+      deleteProductMutation.mutate(productToDelete.id);
+    }
+  };
+
+  // Filtrer les produits selon le filtre sélectionné
+  const filteredProducts = products?.filter(product => {
+    if (showOnlyOutOfStock) {
+      return product.stock === 0;
+    }
+    return true;
+  }) || [];
 
   const getStockBadgeVariant = (stock: number) => {
     if (stock === 0) return "destructive";
@@ -229,7 +272,18 @@ export const AdminProducts = () => {
             Gérez votre stock et vos prix
           </p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <Button
+              variant={showOnlyOutOfStock ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowOnlyOutOfStock(!showOnlyOutOfStock)}
+            >
+              {showOnlyOutOfStock ? "Tous les produits" : "Produits en rupture"}
+            </Button>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
@@ -355,6 +409,7 @@ export const AdminProducts = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>
@@ -364,7 +419,12 @@ export const AdminProducts = () => {
             Catalogue produits
           </CardTitle>
           <CardDescription>
-            {products?.length || 0} produits au total
+            {filteredProducts.length} produits {showOnlyOutOfStock ? 'en rupture' : 'au total'}
+            {showOnlyOutOfStock && products && (
+              <span className="text-muted-foreground ml-2">
+                (sur {products.length} produits total)
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -381,7 +441,7 @@ export const AdminProducts = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products?.map((product) => (
+                {filteredProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div>
@@ -439,16 +499,26 @@ export const AdminProducts = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setEditingProduct(product);
-                          setIsDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingProduct(product);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setProductToDelete(product)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -570,6 +640,36 @@ export const AdminProducts = () => {
             >
               <Save className="h-4 w-4 mr-2" />
               {updateProductMutation.isPending ? 'Modification...' : 'Modifier le produit'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer le produit "{productToDelete?.marque} {productToDelete?.modele}" ?
+              Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setProductToDelete(null)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Annuler
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteProduct}
+              disabled={deleteProductMutation.isPending}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {deleteProductMutation.isPending ? 'Suppression...' : 'Supprimer'}
             </Button>
           </div>
         </DialogContent>
