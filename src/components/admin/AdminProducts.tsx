@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Package, Save, X } from 'lucide-react';
+import { Plus, Edit, Package, Save, X, Trash2, Check } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Pneu {
   id: number;
@@ -31,6 +33,8 @@ export const AdminProducts = () => {
   const [editingProduct, setEditingProduct] = useState<Pneu | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showDeleteMode, setShowDeleteMode] = useState(false);
   const [newProduct, setNewProduct] = useState({
     marque: '',
     modele: '',
@@ -169,6 +173,34 @@ export const AdminProducts = () => {
     },
   });
 
+  const deleteProductsMutation = useMutation({
+    mutationFn: async (productIds: number[]) => {
+      const { error } = await supabase
+        .from('pneus')
+        .delete()
+        .in('id', productIds);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] });
+      setSelectedProducts([]);
+      setShowDeleteMode(false);
+      toast({
+        title: "Produits supprimés",
+        description: `${selectedProducts.length} produit(s) supprimé(s) avec succès.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer les produits.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStockChange = (product: Pneu, change: number) => {
     const newStock = Math.max(0, product.stock + change);
     updateStockMutation.mutate({ id: product.id, newStock });
@@ -211,6 +243,28 @@ export const AdminProducts = () => {
     return `En stock (${stock})`;
   };
 
+  const handleSelectProduct = (productId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts([...selectedProducts, productId]);
+    } else {
+      setSelectedProducts(selectedProducts.filter(id => id !== productId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(products?.map(p => p.id) || []);
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedProducts.length > 0) {
+      deleteProductsMutation.mutate(selectedProducts);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -228,6 +282,61 @@ export const AdminProducts = () => {
           <p className="text-muted-foreground">
             Gérez votre stock et vos prix
           </p>
+        </div>
+        <div className="flex gap-2">
+          {!showDeleteMode ? (
+            <>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDeleteMode(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
+            </>
+          ) : (
+            <>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    disabled={selectedProducts.length === 0}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Supprimer ({selectedProducts.length})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Êtes-vous sûr de vouloir supprimer {selectedProducts.length} produit(s) ? 
+                      Cette action est irréversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={handleDeleteSelected}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowDeleteMode(false);
+                  setSelectedProducts([]);
+                }}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Annuler
+              </Button>
+            </>
+          )}
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -372,6 +481,14 @@ export const AdminProducts = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  {showDeleteMode && (
+                    <TableHead className="w-12">
+                      <Checkbox 
+                        checked={selectedProducts.length === products?.length}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>Produit</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Prix (TND)</TableHead>
@@ -383,6 +500,14 @@ export const AdminProducts = () => {
               <TableBody>
                 {products?.map((product) => (
                   <TableRow key={product.id}>
+                    {showDeleteMode && (
+                      <TableCell>
+                        <Checkbox 
+                          checked={selectedProducts.includes(product.id)}
+                          onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <div>
                         <div className="font-medium">

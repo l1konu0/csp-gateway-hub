@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Search, Upload } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Plus, Edit, Search, Upload, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   useCategories, 
@@ -17,15 +19,20 @@ import {
   useMettreAJourProduit,
   ProduitCatalogue 
 } from "@/hooks/useCatalogue";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import ImportData from "./ImportData";
 
 const AdminCatalogue = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProduitCatalogue | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showImport, setShowImport] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showDeleteMode, setShowDeleteMode] = useState(false);
   
   const [newProduct, setNewProduct] = useState({
     code: 0,
@@ -46,6 +53,33 @@ const AdminCatalogue = () => {
   const { data: produits, isLoading: loadingProduits } = useProduitsCatalogue();
   const ajouterProduit = useAjouterProduit();
   const mettreAJourProduit = useMettreAJourProduit();
+
+  const deleteProductsMutation = useMutation({
+    mutationFn: async (productIds: number[]) => {
+      const { error } = await supabase
+        .from('catalogue_produits')
+        .delete()
+        .in('id', productIds);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalogue-produits'] });
+      setSelectedProducts([]);
+      setShowDeleteMode(false);
+      toast({
+        title: "Produits supprimés",
+        description: `${selectedProducts.length} produit(s) supprimé(s) avec succès.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer les produits.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const filteredProducts = produits?.filter(produit =>
     produit.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,6 +144,28 @@ const AdminCatalogue = () => {
     return { variant: "default" as const, text: "En stock" };
   };
 
+  const handleSelectProduct = (productId: number, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts([...selectedProducts, productId]);
+    } else {
+      setSelectedProducts(selectedProducts.filter(id => id !== productId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(filteredProducts?.map(p => p.id) || []);
+    } else {
+      setSelectedProducts([]);
+    }
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedProducts.length > 0) {
+      deleteProductsMutation.mutate(selectedProducts);
+    }
+  };
+
   if (loadingCategories || loadingProduits) {
     return <div>Chargement...</div>;
   }
@@ -121,13 +177,67 @@ const AdminCatalogue = () => {
           <CardTitle className="flex items-center justify-between">
             Gestion du Catalogue
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowImport(!showImport)}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import SQL
-              </Button>
+              {!showDeleteMode ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowDeleteMode(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Supprimer
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowImport(!showImport)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import SQL
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        disabled={selectedProducts.length === 0}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Supprimer ({selectedProducts.length})
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Êtes-vous sûr de vouloir supprimer {selectedProducts.length} produit(s) ? 
+                          Cette action est irréversible.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleDeleteSelected}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowDeleteMode(false);
+                      setSelectedProducts([]);
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Annuler
+                  </Button>
+                </>
+              )}
+              {!showDeleteMode && (
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
@@ -207,6 +317,7 @@ const AdminCatalogue = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              )}
             </div>
           </CardTitle>
         </CardHeader>
@@ -230,6 +341,14 @@ const AdminCatalogue = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                {showDeleteMode && (
+                  <TableHead className="w-12">
+                    <Checkbox 
+                      checked={selectedProducts.length === filteredProducts?.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                  </TableHead>
+                )}
                 <TableHead>Code</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Désignation</TableHead>
@@ -244,6 +363,14 @@ const AdminCatalogue = () => {
                 const stockStatus = getStockStatus(produit.stock_disponible);
                 return (
                   <TableRow key={produit.id}>
+                    {showDeleteMode && (
+                      <TableCell>
+                        <Checkbox 
+                          checked={selectedProducts.includes(produit.id)}
+                          onCheckedChange={(checked) => handleSelectProduct(produit.id, checked as boolean)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="font-mono">{produit.code}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
