@@ -22,6 +22,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ImportData from "./ImportData";
+import CSVImport from "./CSVImport";
 
 const AdminCatalogue = () => {
   const { toast } = useToast();
@@ -31,6 +32,7 @@ const AdminCatalogue = () => {
   const [editingProduct, setEditingProduct] = useState<ProduitCatalogue | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showImport, setShowImport] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showDeleteMode, setShowDeleteMode] = useState(false);
   
@@ -193,6 +195,13 @@ const AdminCatalogue = () => {
                     <Upload className="h-4 w-4 mr-2" />
                     Import SQL
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowCSVImport(!showCSVImport)}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import CSV
+                  </Button>
                 </>
               ) : (
                 <>
@@ -328,6 +337,12 @@ const AdminCatalogue = () => {
             </div>
           )}
           
+          {showCSVImport && (
+            <div className="mb-6">
+              <CSVImport />
+            </div>
+          )}
+          
           <div className="flex items-center space-x-2 mb-4">
             <Search className="h-4 w-4" />
             <Input
@@ -349,17 +364,16 @@ const AdminCatalogue = () => {
                     />
                   </TableHead>
                 )}
+                <TableHead>Produit</TableHead>
                 <TableHead>Code</TableHead>
-                <TableHead>Catégorie</TableHead>
-                <TableHead>Désignation</TableHead>
-                <TableHead>Stock Dispo</TableHead>
-                <TableHead>Prix Achat HT</TableHead>
+                <TableHead>Désignation Longue</TableHead>
+                <TableHead>Stock Disponible</TableHead>
+                <TableHead>Prix d'achat HT</TableHead>
                 <TableHead>Remise</TableHead>
                 <TableHead>Marge</TableHead>
-                <TableHead>Prix Vente HT</TableHead>
-                <TableHead>TVA %</TableHead>
-                <TableHead>Prix Vente TTC</TableHead>
-                <TableHead>Statut</TableHead>
+                <TableHead>Prix de vente HT</TableHead>
+                <TableHead>Taux TVA</TableHead>
+                <TableHead>Prix de Vente TTC</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -376,12 +390,12 @@ const AdminCatalogue = () => {
                         />
                       </TableCell>
                     )}
-                    <TableCell className="font-mono">{produit.code}</TableCell>
                     <TableCell>
                       <Badge variant="outline">
-                        {produit.categories?.code}
+                        {produit.categories?.nom}
                       </Badge>
                     </TableCell>
+                    <TableCell className="font-mono">{produit.code}</TableCell>
                     <TableCell className="max-w-xs truncate">
                       {produit.designation}
                     </TableCell>
@@ -396,11 +410,6 @@ const AdminCatalogue = () => {
                     <TableCell>{(produit.prix_vente / (1 + produit.taux_tva / 100)).toFixed(3)} TND</TableCell>
                     <TableCell>{produit.taux_tva}%</TableCell>
                     <TableCell>{produit.prix_vente.toFixed(3)} TND</TableCell>
-                    <TableCell>
-                      <Badge variant={stockStatus.variant}>
-                        {stockStatus.text}
-                      </Badge>
-                    </TableCell>
                     <TableCell>
                       <Button
                         variant="ghost" 
