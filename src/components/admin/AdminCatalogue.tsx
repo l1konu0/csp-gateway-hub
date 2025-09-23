@@ -352,8 +352,13 @@ const AdminCatalogue = () => {
                 <TableHead>Code</TableHead>
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Désignation</TableHead>
-                <TableHead>Prix</TableHead>
-                <TableHead>Stock</TableHead>
+                <TableHead>Stock Dispo</TableHead>
+                <TableHead>Prix Achat HT</TableHead>
+                <TableHead>Remise</TableHead>
+                <TableHead>Marge</TableHead>
+                <TableHead>Prix Vente HT</TableHead>
+                <TableHead>TVA %</TableHead>
+                <TableHead>Prix Vente TTC</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -380,8 +385,17 @@ const AdminCatalogue = () => {
                     <TableCell className="max-w-xs truncate">
                       {produit.designation}
                     </TableCell>
-                    <TableCell>{produit.prix_vente.toFixed(3)} TND</TableCell>
                     <TableCell>{produit.stock_disponible}</TableCell>
+                    <TableCell>{produit.prix_achat.toFixed(3)} TND</TableCell>
+                    <TableCell>
+                      {((1 - (produit.prix_achat / produit.prix_vente)) * 100).toFixed(1)}%
+                    </TableCell>
+                    <TableCell>
+                      {((produit.prix_vente - produit.prix_achat) / produit.prix_achat * 100).toFixed(1)}%
+                    </TableCell>
+                    <TableCell>{(produit.prix_vente / (1 + produit.taux_tva / 100)).toFixed(3)} TND</TableCell>
+                    <TableCell>{produit.taux_tva}%</TableCell>
+                    <TableCell>{produit.prix_vente.toFixed(3)} TND</TableCell>
                     <TableCell>
                       <Badge variant={stockStatus.variant}>
                         {stockStatus.text}
