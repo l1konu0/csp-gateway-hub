@@ -271,29 +271,55 @@ const AdminCatalogue = () => {
       }
       
       // Convertir tous les produits du catalogue en format pneus
-      const pneusToInsert = catalogueProducts.map(prod => ({
-        marque: prod.designation.split(' ')[0] || 'Marque inconnue',
-        modele: prod.designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu',
-        dimensions: prod.designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues',
-        type: 'pneu',
-        prix: prod.prix_vente,
-        stock: prod.stock_disponible,
-        description: prod.designation,
-        image_url: null
-      }));
+      const pneusToInsert = catalogueProducts.map(prod => {
+        // Nettoyer et valider les données
+        const designation = prod.designation || '';
+        const marque = designation.split(' ')[0] || 'Marque inconnue';
+        const modele = designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu';
+        const dimensions = designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues';
+        const prix = parseFloat(prod.prix_vente) || 0;
+        const stock = parseInt(prod.stock_disponible) || 0;
+        
+        return {
+          marque: marque.substring(0, 50), // Limiter la longueur
+          modele: modele.substring(0, 100),
+          dimensions: dimensions.substring(0, 50),
+          type: 'pneu',
+          prix: Math.max(0, prix), // Prix positif
+          stock: Math.max(0, stock), // Stock positif
+          description: designation.substring(0, 500),
+          image_url: null
+        };
+      }).filter(pneu => 
+        // Filtrer les produits valides
+        pneu.marque !== 'Marque inconnue' && 
+        pneu.prix > 0 && 
+        pneu.dimensions !== 'Dimensions inconnues'
+      );
       
-      console.log('Conversion en pneus:', pneusToInsert.slice(0, 3));
+      console.log('Produits valides après filtrage:', pneusToInsert.length);
+      console.log('Exemple de conversion:', pneusToInsert.slice(0, 3));
+      
+      if (pneusToInsert.length === 0) {
+        toast({
+          title: "Aucun produit valide",
+          description: "Aucun produit n'a pu être converti en format pneus.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Insérer par lots pour éviter les timeouts
-      const batchSize = 100;
+      const batchSize = 50; // Réduire la taille des lots
       let successCount = 0;
       let errorCount = 0;
       
       for (let i = 0; i < pneusToInsert.length; i += batchSize) {
         const batch = pneusToInsert.slice(i, i + batchSize);
+        console.log(`Traitement du batch ${i}-${i + batch.length}:`, batch.length, 'produits');
         
         try {
-          const { error: insertError } = await supabase
+          const { data, error: insertError } = await supabase
             .from('pneus')
             .upsert(batch, { 
               onConflict: 'marque,modele,dimensions',
@@ -302,10 +328,13 @@ const AdminCatalogue = () => {
           
           if (insertError) {
             console.error('Erreur batch', i, ':', insertError);
+            console.error('Détails de l\'erreur:', insertError.details);
+            console.error('Message:', insertError.message);
+            console.error('Code:', insertError.code);
             errorCount += batch.length;
           } else {
             successCount += batch.length;
-            console.log(`Batch ${i}-${i + batch.length} synchronisé avec succès`);
+            console.log(`Batch ${i}-${i + batch.length} synchronisé avec succès:`, data?.length, 'produits');
           }
         } catch (batchError) {
           console.error('Erreur batch', i, ':', batchError);
