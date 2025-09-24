@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
-import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { AdminDashboardAdvanced } from '@/components/admin/AdminDashboardAdvanced';
 import { AdminCatalogueManager } from '@/components/admin/AdminCatalogueManager';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminUsers } from '@/components/admin/AdminUsers';
@@ -104,7 +104,7 @@ const Admin = () => {
               </TabsList>
 
               <TabsContent value="dashboard" className="mt-6">
-                <AdminDashboard />
+                <AdminDashboardAdvanced />
               </TabsContent>
 
               <TabsContent value="catalogue" className="mt-6">
