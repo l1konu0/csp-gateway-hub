@@ -48,6 +48,9 @@ export const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { csvProducts, clearCsvProducts, removeCsvProduct } = useCSV();
+  
+  // Debug: Afficher le nombre de produits CSV
+  console.log('AdminProducts - Nombre de produits CSV:', csvProducts.length);
   const [editingProduct, setEditingProduct] = useState<Pneu | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -345,7 +348,7 @@ export const AdminProducts = () => {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Gestion des produits</h2>
           <p className="text-muted-foreground">
-            Gérez votre stock et vos prix
+            Gérez votre stock et vos prix - Version 2.0 avec CSV
           </p>
         </div>
         <div className="flex items-center gap-4">
