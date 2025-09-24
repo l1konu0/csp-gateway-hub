@@ -46,6 +46,7 @@ export type Database = {
           coefficient: number
           created_at: string
           designation: string
+          famille: string | null
           id: number
           prix_achat: number
           prix_moyen_achat: number
@@ -63,6 +64,7 @@ export type Database = {
           coefficient?: number
           created_at?: string
           designation: string
+          famille?: string | null
           id?: number
           prix_achat?: number
           prix_moyen_achat?: number
@@ -80,6 +82,7 @@ export type Database = {
           coefficient?: number
           created_at?: string
           designation?: string
+          famille?: string | null
           id?: number
           prix_achat?: number
           prix_moyen_achat?: number

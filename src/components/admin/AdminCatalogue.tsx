@@ -42,6 +42,7 @@ const AdminCatalogue = () => {
   const [newProduct, setNewProduct] = useState({
     code: 0,
     categorie_id: 0,
+    famille: "",
     designation: "",
     stock_reel: 0,
     stock_disponible: 0,
@@ -409,6 +410,16 @@ const AdminCatalogue = () => {
                     </div>
 
                     <div>
+                      <Label htmlFor="famille">Famille</Label>
+                      <Input
+                        id="famille"
+                        value={newProduct.famille || ''}
+                        onChange={(e) => setNewProduct({...newProduct, famille: e.target.value})}
+                        placeholder="Code famille (ex: FA0001)"
+                      />
+                    </div>
+
+                    <div>
                       <Label htmlFor="designation">Désignation</Label>
                       <Textarea
                         id="designation"
@@ -487,6 +498,7 @@ const AdminCatalogue = () => {
                 )}
                 <TableHead>Produit</TableHead>
                 <TableHead>Code</TableHead>
+                <TableHead>Famille</TableHead>
                 <TableHead>Désignation Longue</TableHead>
                 <TableHead>Stock Disponible</TableHead>
                 <TableHead>Prix d'achat HT</TableHead>
@@ -517,6 +529,9 @@ const AdminCatalogue = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono">{produit.code}</TableCell>
+                    <TableCell className="font-medium text-blue-600">
+                      {produit.famille || 'N/A'}
+                    </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {produit.designation}
                     </TableCell>
@@ -559,6 +574,16 @@ const AdminCatalogue = () => {
           </DialogHeader>
           {editingProduct && (
             <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit_famille">Famille</Label>
+                <Input
+                  id="edit_famille"
+                  value={editingProduct.famille || ''}
+                  onChange={(e) => setEditingProduct({...editingProduct, famille: e.target.value})}
+                  placeholder="Code famille (ex: FA0001)"
+                />
+              </div>
+
               <div>
                 <Label htmlFor="edit_designation">Désignation</Label>
                 <Textarea
