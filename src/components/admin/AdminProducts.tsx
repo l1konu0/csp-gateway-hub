@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { usePneusAdmin } from '@/hooks/usePneus';
 import { useCSV } from '@/contexts/CSVContext';
 import { TestCSV } from './TestCSV';
 import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, RefreshCw } from 'lucide-react';
@@ -69,18 +70,7 @@ export const AdminProducts = () => {
     image_url: ''
   });
 
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['admin-products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pneus')
-        .select('*')
-        .order('marque', { ascending: true });
-
-      if (error) throw error;
-      return data as Pneu[];
-    },
-  });
+  const { data: products, isLoading } = usePneusAdmin();
 
   const updateStockMutation = useMutation({
     mutationFn: async ({ id, newStock }: { id: number; newStock: number }) => {

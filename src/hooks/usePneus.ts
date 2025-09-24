@@ -22,6 +22,7 @@ export const usePneus = () => {
       const { data, error } = await supabase
         .from("pneus")
         .select("*")
+        .gt("stock", 0) // Filtrer les produits avec stock > 0
         .order("marque", { ascending: true });
       
       if (error) {
@@ -40,6 +41,7 @@ export const usePneusByMarque = (marque?: string) => {
       let query = supabase
         .from("pneus")
         .select("*")
+        .gt("stock", 0) // Filtrer les produits avec stock > 0
         .order("modele", { ascending: true });
       
       if (marque && marque !== "Toutes") {
@@ -64,6 +66,7 @@ export const usePneusSearch = (searchQuery?: string, marque?: string) => {
       let query = supabase
         .from("pneus")
         .select("*")
+        .gt("stock", 0) // Filtrer les produits avec stock > 0
         .order("marque", { ascending: true });
       
       // Filtrer par marque si spécifiée
@@ -99,11 +102,31 @@ export const usePneusCompatibles = (dimensions: string[]) => {
         .from('pneus')
         .select('*')
         .in('dimensions', dimensions)
+        .gt('stock', 0) // Filtrer les produits avec stock > 0
         .order('marque', { ascending: true });
 
       if (error) throw error;
       return data || [];
     },
     enabled: dimensions && dimensions.length > 0,
+  });
+};
+
+// Hook pour l'administration - affiche TOUS les produits (y compris stock = 0)
+export const usePneusAdmin = () => {
+  return useQuery({
+    queryKey: ["pneus-admin"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pneus")
+        .select("*")
+        .order("marque", { ascending: true });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data as Pneu[];
+    },
   });
 };
