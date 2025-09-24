@@ -47,7 +47,7 @@ export const useCategories = () => {
   });
 };
 
-// Hook pour récupérer tous les produits avec leurs catégories
+// Hook pour récupérer tous les produits avec leurs catégories (pour l'administration)
 export const useProduitsCatalogue = () => {
   return useQuery({
     queryKey: ["catalogue-produits"],
@@ -64,6 +64,35 @@ export const useProduitsCatalogue = () => {
           )
         `)
         .eq("actif", true)
+        .order("code", { ascending: true });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return data as ProduitCatalogue[];
+    },
+  });
+};
+
+// Hook pour récupérer les produits côté client (filtre stock > 0)
+export const useProduitsCatalogueClient = () => {
+  return useQuery({
+    queryKey: ["catalogue-produits-client"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("catalogue_produits")
+        .select(`
+          *,
+          categories (
+            id,
+            code,
+            nom,
+            description
+          )
+        `)
+        .eq("actif", true)
+        .gt("stock_disponible", 0) // Filtrer les produits avec stock > 0
         .order("code", { ascending: true });
       
       if (error) {
@@ -92,6 +121,7 @@ export const useProduitsParCategorie = (categorieCode?: string) => {
           )
         `)
         .eq("actif", true)
+        .gt("stock_disponible", 0) // Filtrer les produits avec stock > 0
         .order("designation", { ascending: true });
       
       if (categorieCode && categorieCode !== "TOUS") {
@@ -126,6 +156,7 @@ export const useRechercherProduits = (searchQuery?: string, categorieCode?: stri
           )
         `)
         .eq("actif", true)
+        .gt("stock_disponible", 0) // Filtrer les produits avec stock > 0
         .order("designation", { ascending: true });
       
       // Filtrer par catégorie si spécifiée
