@@ -345,6 +345,81 @@ export const AdminProducts = () => {
     }
   };
 
+  const handleSyncFromCatalogue = async () => {
+    console.log('Récupération des produits du catalogue...');
+    setIsSyncing(true);
+    
+    try {
+      // Récupérer les produits du catalogue
+      const { data: catalogueProducts, error } = await supabase
+        .from('catalogue_produits')
+        .select('*')
+        .eq('actif', true);
+      
+      if (error) {
+        console.error('Erreur lors de la récupération:', error);
+        throw error;
+      }
+      
+      console.log('Produits récupérés du catalogue:', catalogueProducts?.length || 0);
+      
+      if (!catalogueProducts || catalogueProducts.length === 0) {
+        toast({
+          title: "Aucun produit",
+          description: "Aucun produit trouvé dans le catalogue.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Convertir les produits du catalogue en format pneus
+      const pneusToInsert = catalogueProducts.map(prod => ({
+        marque: prod.designation.split(' ')[0] || 'Marque inconnue',
+        modele: prod.designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu',
+        dimensions: prod.designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues',
+        type: 'pneu',
+        prix: prod.prix_vente,
+        stock: prod.stock_disponible,
+        description: prod.designation,
+        image_url: null
+      }));
+      
+      console.log('Conversion en pneus:', pneusToInsert.slice(0, 3));
+      
+      // Insérer dans la table pneus
+      const { error: insertError } = await supabase
+        .from('pneus')
+        .upsert(pneusToInsert, { 
+          onConflict: 'marque,modele,dimensions',
+          ignoreDuplicates: false 
+        });
+      
+      if (insertError) {
+        console.error('Erreur lors de l\'insertion:', insertError);
+        throw insertError;
+      }
+      
+      // Invalider les caches
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] });
+      
+      toast({
+        title: "Synchronisation réussie",
+        description: `${catalogueProducts.length} produits synchronisés du catalogue vers le site.`,
+      });
+      
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+      toast({
+        title: "Erreur de synchronisation",
+        description: `Impossible de synchroniser: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleRemoveCSVProduct = (index: number) => {
     removeCsvProduct(index);
   };
@@ -417,6 +492,15 @@ export const AdminProducts = () => {
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               {isSyncing ? "Synchronisation..." : `Synchroniser (${csvProducts.length})`}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleSyncFromCatalogue}
+              disabled={isSyncing}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {isSyncing ? "Sync..." : "Sync Catalogue → Site"}
             </Button>
             <Button
               variant="outline"
