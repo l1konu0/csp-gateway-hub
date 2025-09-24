@@ -65,7 +65,7 @@ export const AdminCatalogueManager = () => {
   // États locaux
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showInactive, setShowInactive] = useState(false);
+  const [showInactive, setShowInactive] = useState(true); // Par défaut, afficher tous les produits
   const [editingProduct, setEditingProduct] = useState<ProduitCatalogue | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -117,7 +117,8 @@ export const AdminCatalogueManager = () => {
             description
           )
         `)
-        .order('code', { ascending: true });
+        .order('code', { ascending: true })
+        .limit(10000); // Limite élevée pour récupérer tous les produits
 
       // Filtre par recherche
       if (searchQuery) {
@@ -338,6 +339,14 @@ export const AdminCatalogueManager = () => {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['catalogue-produits-admin'] })}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualiser
+          </Button>
           <Button
             variant="outline"
             size="sm"
