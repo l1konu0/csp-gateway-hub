@@ -24,40 +24,47 @@ import OrderSuccess from "./pages/OrderSuccess";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+// Composant interne qui utilise usePendingCart à l'intérieur du QueryClientProvider
+const AppContent = () => {
   // Hook pour gérer l'ajout automatique au panier après connexion
   usePendingCart();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <CSVProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin-auth" element={<AdminAuth />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/pneus-auto" element={<PneusAuto />} />
-          <Route path="/jantes" element={<Jantes />} />
-          <Route path="/lubrifiants" element={<Lubrifiants />} />
-          <Route path="/accessoires" element={<Accessoires />} />
-          <Route path="/pieces-detachees" element={<PiecesDetachees />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/rendez-vous" element={<RendezVous />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-success" element={<OrderSuccess />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+    <CSVProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin-auth" element={<AdminAuth />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/pneus-auto" element={<PneusAuto />} />
+            <Route path="/jantes" element={<Jantes />} />
+            <Route path="/lubrifiants" element={<Lubrifiants />} />
+            <Route path="/accessoires" element={<Accessoires />} />
+            <Route path="/pieces-detachees" element={<PiecesDetachees />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/rendez-vous" element={<RendezVous />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </CSVProvider>
-  </QueryClientProvider>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AppContent />
+    </QueryClientProvider>
   );
 };
 
