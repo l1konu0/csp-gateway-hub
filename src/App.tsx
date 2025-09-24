@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CSVProvider } from "@/contexts/CSVContext";
+import { usePendingCart } from "@/hooks/usePendingCart";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -23,13 +24,17 @@ import OrderSuccess from "./pages/OrderSuccess";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CSVProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+const App = () => {
+  // Hook pour gérer l'ajout automatique au panier après connexion
+  usePendingCart();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <CSVProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
@@ -53,6 +58,7 @@ const App = () => (
       </TooltipProvider>
     </CSVProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

@@ -8,7 +8,7 @@ import { useRechercherProduits, ProduitCatalogue } from "@/hooks/useCatalogue";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import tireSample from "@/assets/tire-sample.jpg";
 
 interface ProductGridProps {
@@ -26,6 +26,7 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
   const { user } = useAuth();
   const { addToCart, isAddingToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Utiliser le nouveau hook de recherche dans le catalogue
   const { data: products = [], isLoading: loading, error } = useRechercherProduits(searchQuery, selectedCategory || undefined);
@@ -35,12 +36,26 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
 
   const handleAddToCart = (productId: string) => {
     if (!user) {
+      // Trouver le produit pour sauvegarder ses infos
+      const product = products.find(p => p.id.toString() === productId);
+      if (product) {
+        localStorage.setItem('pendingCartItem', JSON.stringify({
+          productId: productId,
+          productName: product.designation,
+          productPrice: product.prix_vente
+        }));
+      }
+      
       toast({
         title: "Connexion requise",
         description: "Vous devez vous connecter pour ajouter des produits au panier.",
         action: (
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/auth">Se connecter</Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/auth')}
+          >
+            Se connecter
           </Button>
         ),
       });

@@ -12,7 +12,7 @@ import { Grid, List, Filter } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import tireSample from '@/assets/tire-sample.jpg';
 
 interface PneusGridProps {
@@ -30,18 +30,19 @@ const PneusGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pneus
   const { user } = useAuth();
   const { addToCart, isAddingToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Récupérer uniquement les pneus (categorie_id = 1) avec stock > 0
   const { data: allProducts = [], isLoading: loading, error } = useRechercherProduits(searchQuery, 'FA0001');
   
   // Filtrer par famille si sélectionnée
   const filteredProducts = selectedFamille 
-    ? allProducts.filter(p => p.famille === selectedFamille)
+    ? allProducts.filter(p => (p as any).famille === selectedFamille)
     : allProducts;
 
   // Grouper les produits par famille
   const productsByFamille = allProducts.reduce((acc, product) => {
-    const famille = product.famille || 'Autres';
+    const famille = (product as any).famille || 'Autres';
     if (!acc[famille]) {
       acc[famille] = [];
     }
@@ -54,12 +55,26 @@ const PneusGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pneus
 
   const handleAddToCart = (productId: string) => {
     if (!user) {
+      // Trouver le produit pour sauvegarder ses infos
+      const product = allProducts.find(p => p.id.toString() === productId);
+      if (product) {
+        localStorage.setItem('pendingCartItem', JSON.stringify({
+          productId: productId,
+          productName: product.designation,
+          productPrice: product.prix_vente
+        }));
+      }
+      
       toast({
         title: "Connexion requise",
         description: "Vous devez vous connecter pour ajouter des produits au panier.",
         action: (
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/auth">Se connecter</Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/auth')}
+          >
+            Se connecter
           </Button>
         ),
       });

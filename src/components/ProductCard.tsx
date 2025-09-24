@@ -5,7 +5,7 @@ import { Star, ShoppingCart, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
   product: {
@@ -30,6 +30,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const { user } = useAuth();
   const { addToCart, isAddingToCart } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const discount = product.originalPrice 
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -37,12 +38,23 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
   const handleAddToCart = () => {
     if (!user) {
+      // Sauvegarder le produit à ajouter dans localStorage
+      localStorage.setItem('pendingCartItem', JSON.stringify({
+        productId: product.id,
+        productName: product.name,
+        productPrice: product.price
+      }));
+      
       toast({
         title: "Connexion requise",
         description: "Vous devez vous connecter pour ajouter des produits au panier.",
         action: (
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/auth">Se connecter</Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/auth')}
+          >
+            Se connecter
           </Button>
         ),
       });
