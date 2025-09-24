@@ -28,24 +28,25 @@ const ImportData = () => {
   };
 
   // Fonction pour convertir une ligne CSV en produit
-  const parseCSVToProduct = (csvRow: any, rowIndex: number = 0) => {
+  const parseCSVToProduct = (csvRow: any, columnMap: any, rowIndex: number = 0) => {
     // Debug: Afficher les données de la ligne
     if (rowIndex < 3) {
       console.log(`Ligne ${rowIndex + 1}:`, csvRow);
+      console.log('Column map utilisé:', columnMap);
     }
 
-    // Mapping flexible des colonnes CSV vers les champs de la base
-    const code = parseInt(csvRow.code || csvRow.col0 || csvRow['Code'] || csvRow['code'] || '0');
-    const famille = csvRow.famille || csvRow.col1 || csvRow['Famille'] || csvRow['Code Famille'] || csvRow['famille'] || csvRow['FAMILLE'] || '';
-    const designation = csvRow.designation || csvRow.col2 || csvRow['Désignation'] || csvRow['Designation'] || csvRow['designation'] || csvRow['DESIGNATION'] || '';
-    const stockReel = parseInt(csvRow.stock_reel || csvRow.col3 || csvRow['Stock Réel'] || csvRow['Stock Reel'] || csvRow['stock_reel'] || csvRow['STOCK_REEL'] || '0');
-    const stockDispo = parseInt(csvRow.stock_disponible || csvRow.col4 || csvRow['Stock Disponible'] || csvRow['stock_disponible'] || csvRow['STOCK_DISPONIBLE'] || '0');
-    const prixAchat = parseFloat(csvRow.prix_achat || csvRow.col5 || csvRow['Prix Achat'] || csvRow['prix_achat'] || csvRow['PRIX_ACHAT'] || '0');
-    const pamp = parseFloat(csvRow.prix_moyen_achat || csvRow.col6 || csvRow['Prix Moyen Achat'] || csvRow['PAMP'] || csvRow['prix_moyen_achat'] || csvRow['PRIX_MOYEN_ACHAT'] || '0');
-    const prixVente = parseFloat(csvRow.prix_vente || csvRow.col7 || csvRow['Prix Vente'] || csvRow['prix_vente'] || csvRow['PRIX_VENTE'] || '0');
-    const valeurStock = parseFloat(csvRow.valeur_stock || csvRow.col8 || csvRow['Valeur Stock'] || csvRow['valeur_stock'] || csvRow['VALEUR_STOCK'] || '0');
-    const tauxTva = parseInt(csvRow.taux_tva || csvRow.col9 || csvRow['Taux TVA'] || csvRow['taux_tva'] || csvRow['TAUX_TVA'] || '19');
-    const coef = parseFloat(csvRow.coefficient || csvRow.col10 || csvRow['Coefficient'] || csvRow['coefficient'] || csvRow['COEFFICIENT'] || '1');
+    // Utiliser le mapping détecté automatiquement
+    const code = parseInt(csvRow[columnMap.code] || csvRow.col0 || '0');
+    const famille = csvRow[columnMap.famille] || csvRow.col1 || '';
+    const designation = csvRow[columnMap.designation] || csvRow.col2 || '';
+    const stockReel = parseInt(csvRow[columnMap.stock_reel] || csvRow.col3 || '0');
+    const stockDispo = parseInt(csvRow[columnMap.stock_disponible] || csvRow.col4 || '0');
+    const prixAchat = parseFloat(csvRow[columnMap.prix_achat] || csvRow.col5 || '0');
+    const pamp = parseFloat(csvRow[columnMap.prix_moyen_achat] || csvRow.col6 || '0');
+    const prixVente = parseFloat(csvRow[columnMap.prix_vente] || csvRow.col7 || '0');
+    const valeurStock = parseFloat(csvRow[columnMap.valeur_stock] || csvRow.col8 || '0');
+    const tauxTva = parseInt(csvRow[columnMap.taux_tva] || csvRow.col9 || '19');
+    const coef = parseFloat(csvRow[columnMap.coefficient] || csvRow.col10 || '1');
 
     // Debug: Afficher les valeurs extraites
     if (rowIndex < 3) {
@@ -55,7 +56,12 @@ const ImportData = () => {
     }
 
     if (!code || !famille || !designation) {
-      console.warn(`Ligne ${rowIndex + 1}: Code ou désignation manquant`, { code, famille, designation });
+      console.warn(`Ligne ${rowIndex + 1}: Code ou désignation manquant`, { 
+        code, famille, designation,
+        'code source': csvRow[columnMap.code],
+        'famille source': csvRow[columnMap.famille],
+        'designation source': csvRow[columnMap.designation]
+      });
       return null;
     }
 
@@ -110,6 +116,44 @@ const ImportData = () => {
     return row;
   };
 
+  // Fonction pour détecter automatiquement les colonnes CSV
+  const detectCSVColumns = (firstLine: string) => {
+    const values = parseCSVLine(firstLine, []);
+    const columnMap: any = {};
+    
+    values.forEach((value, index) => {
+      const cleanValue = value.toLowerCase().replace(/[^a-z0-9]/g, '');
+      
+      // Mapping intelligent des colonnes
+      if (cleanValue.includes('code') || cleanValue === 'id') {
+        columnMap.code = index;
+      } else if (cleanValue.includes('famille') || cleanValue.includes('categorie')) {
+        columnMap.famille = index;
+      } else if (cleanValue.includes('designation') || cleanValue.includes('nom') || cleanValue.includes('libelle')) {
+        columnMap.designation = index;
+      } else if (cleanValue.includes('stock') && cleanValue.includes('reel')) {
+        columnMap.stock_reel = index;
+      } else if (cleanValue.includes('stock') && cleanValue.includes('disponible')) {
+        columnMap.stock_disponible = index;
+      } else if (cleanValue.includes('prix') && cleanValue.includes('achat')) {
+        columnMap.prix_achat = index;
+      } else if (cleanValue.includes('prix') && cleanValue.includes('moyen')) {
+        columnMap.prix_moyen_achat = index;
+      } else if (cleanValue.includes('prix') && cleanValue.includes('vente')) {
+        columnMap.prix_vente = index;
+      } else if (cleanValue.includes('valeur') && cleanValue.includes('stock')) {
+        columnMap.valeur_stock = index;
+      } else if (cleanValue.includes('tva')) {
+        columnMap.taux_tva = index;
+      } else if (cleanValue.includes('coefficient') || cleanValue.includes('coef')) {
+        columnMap.coefficient = index;
+      }
+    });
+    
+    console.log('Mapping des colonnes détecté:', columnMap);
+    return columnMap;
+  };
+
   // Fonction pour parser une ligne de données SQL (gardée pour compatibilité)
   const parseSQLLine = (line: string) => {
     // Regex pour extraire les valeurs d'un INSERT
@@ -162,9 +206,13 @@ const ImportData = () => {
         headers = firstLineValues.map((_, i) => `col${i}`);
         dataLines = lines.slice(1);
         
+        // Détecter automatiquement les colonnes
+        const columnMap = detectCSVColumns(lines[0]);
+        
         // Debug: Afficher les headers détectés
         console.log('Headers détectés:', firstLineValues);
         console.log('Première ligne de données:', dataLines[0]);
+        console.log('Mapping des colonnes:', columnMap);
       } else {
         // Fichier SQL - garder l'ancienne logique
         dataLines = lines.filter(line => 
@@ -200,7 +248,8 @@ const ImportData = () => {
           if (isCSV) {
             // Parser CSV
             const csvRow = parseCSVLine(line, headers);
-            product = parseCSVToProduct(csvRow, i + j);
+            const columnMap = detectCSVColumns(lines[0]); // Recalculer pour chaque batch
+            product = parseCSVToProduct(csvRow, columnMap, i + j);
           } else {
             // Parser SQL
             product = parseSQLLine(line);
