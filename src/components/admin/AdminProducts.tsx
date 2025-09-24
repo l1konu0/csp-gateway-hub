@@ -30,7 +30,7 @@ interface Pneu {
 interface ProduitCSV {
   id?: number;
   code: number;
-  famille: string;
+  categorie_id: number;
   designation: string;
   stock_reel: number;
   stock_disponible: number;
@@ -40,7 +40,6 @@ interface ProduitCSV {
   valeur_stock: number;
   taux_tva: number;
   coefficient: number;
-  categorie_id: number;
   actif: boolean;
   synced?: boolean;
 }
@@ -569,7 +568,7 @@ export const AdminProducts = () => {
                           <div className="font-medium">{product.code}</div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline">{product.famille}</Badge>
+                          <Badge variant="outline">Catégorie {product.categorie_id}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="max-w-xs truncate" title={product.designation}>

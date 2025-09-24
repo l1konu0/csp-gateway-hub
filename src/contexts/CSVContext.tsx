@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface ProduitCSV {
   id?: number;
   code: number;
-  famille: string;
+  categorie_id: number;
   designation: string;
   stock_reel: number;
   stock_disponible: number;
@@ -13,7 +13,6 @@ interface ProduitCSV {
   valeur_stock: number;
   taux_tva: number;
   coefficient: number;
-  categorie_id: number;
   actif: boolean;
   synced?: boolean;
 }

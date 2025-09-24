@@ -314,6 +314,8 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
 
         // Ajouter les produits CSV au contexte
         if (allCSVProducts.length > 0) {
+          console.log('Ajout de', allCSVProducts.length, 'produits CSV au contexte');
+          console.log('Premier produit:', allCSVProducts[0]);
           addCsvProducts(allCSVProducts);
         }
 
