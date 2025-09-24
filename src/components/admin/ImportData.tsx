@@ -28,27 +28,40 @@ const ImportData = () => {
   };
 
   // Fonction pour convertir une ligne CSV en produit
-  const parseCSVToProduct = (csvRow: any) => {
+  const parseCSVToProduct = (csvRow: any, rowIndex: number = 0) => {
+    // Debug: Afficher les données de la ligne
+    if (rowIndex < 3) {
+      console.log(`Ligne ${rowIndex + 1}:`, csvRow);
+    }
+
     // Mapping flexible des colonnes CSV vers les champs de la base
-    const code = parseInt(csvRow.code || csvRow.col0 || csvRow['Code'] || '0');
-    const famille = csvRow.famille || csvRow.col1 || csvRow['Famille'] || csvRow['Code Famille'] || '';
-    const designation = csvRow.designation || csvRow.col2 || csvRow['Désignation'] || csvRow['Designation'] || '';
-    const stockReel = parseInt(csvRow.stock_reel || csvRow.col3 || csvRow['Stock Réel'] || csvRow['Stock Reel'] || '0');
-    const stockDispo = parseInt(csvRow.stock_disponible || csvRow.col4 || csvRow['Stock Disponible'] || '0');
-    const prixAchat = parseFloat(csvRow.prix_achat || csvRow.col5 || csvRow['Prix Achat'] || '0');
-    const pamp = parseFloat(csvRow.prix_moyen_achat || csvRow.col6 || csvRow['Prix Moyen Achat'] || csvRow['PAMP'] || '0');
-    const prixVente = parseFloat(csvRow.prix_vente || csvRow.col7 || csvRow['Prix Vente'] || '0');
-    const valeurStock = parseFloat(csvRow.valeur_stock || csvRow.col8 || csvRow['Valeur Stock'] || '0');
-    const tauxTva = parseInt(csvRow.taux_tva || csvRow.col9 || csvRow['Taux TVA'] || '19');
-    const coef = parseFloat(csvRow.coefficient || csvRow.col10 || csvRow['Coefficient'] || '1');
+    const code = parseInt(csvRow.code || csvRow.col0 || csvRow['Code'] || csvRow['code'] || '0');
+    const famille = csvRow.famille || csvRow.col1 || csvRow['Famille'] || csvRow['Code Famille'] || csvRow['famille'] || csvRow['FAMILLE'] || '';
+    const designation = csvRow.designation || csvRow.col2 || csvRow['Désignation'] || csvRow['Designation'] || csvRow['designation'] || csvRow['DESIGNATION'] || '';
+    const stockReel = parseInt(csvRow.stock_reel || csvRow.col3 || csvRow['Stock Réel'] || csvRow['Stock Reel'] || csvRow['stock_reel'] || csvRow['STOCK_REEL'] || '0');
+    const stockDispo = parseInt(csvRow.stock_disponible || csvRow.col4 || csvRow['Stock Disponible'] || csvRow['stock_disponible'] || csvRow['STOCK_DISPONIBLE'] || '0');
+    const prixAchat = parseFloat(csvRow.prix_achat || csvRow.col5 || csvRow['Prix Achat'] || csvRow['prix_achat'] || csvRow['PRIX_ACHAT'] || '0');
+    const pamp = parseFloat(csvRow.prix_moyen_achat || csvRow.col6 || csvRow['Prix Moyen Achat'] || csvRow['PAMP'] || csvRow['prix_moyen_achat'] || csvRow['PRIX_MOYEN_ACHAT'] || '0');
+    const prixVente = parseFloat(csvRow.prix_vente || csvRow.col7 || csvRow['Prix Vente'] || csvRow['prix_vente'] || csvRow['PRIX_VENTE'] || '0');
+    const valeurStock = parseFloat(csvRow.valeur_stock || csvRow.col8 || csvRow['Valeur Stock'] || csvRow['valeur_stock'] || csvRow['VALEUR_STOCK'] || '0');
+    const tauxTva = parseInt(csvRow.taux_tva || csvRow.col9 || csvRow['Taux TVA'] || csvRow['taux_tva'] || csvRow['TAUX_TVA'] || '19');
+    const coef = parseFloat(csvRow.coefficient || csvRow.col10 || csvRow['Coefficient'] || csvRow['coefficient'] || csvRow['COEFFICIENT'] || '1');
+
+    // Debug: Afficher les valeurs extraites
+    if (rowIndex < 3) {
+      console.log(`Valeurs extraites ligne ${rowIndex + 1}:`, {
+        code, famille, designation, stockReel, stockDispo, prixAchat, pamp, prixVente, valeurStock, tauxTva, coef
+      });
+    }
 
     if (!code || !famille || !designation) {
+      console.warn(`Ligne ${rowIndex + 1}: Code ou désignation manquant`, { code, famille, designation });
       return null;
     }
 
     const categorieId = getCategoryId(famille);
     if (!categorieId) {
-      console.warn(`Catégorie non trouvée pour le code: ${famille}`);
+      console.warn(`Ligne ${rowIndex + 1}: Catégorie non trouvée pour le code: ${famille}`);
       return null;
     }
 
@@ -148,6 +161,10 @@ const ImportData = () => {
         const firstLineValues = parseCSVLine(lines[0], []);
         headers = firstLineValues.map((_, i) => `col${i}`);
         dataLines = lines.slice(1);
+        
+        // Debug: Afficher les headers détectés
+        console.log('Headers détectés:', firstLineValues);
+        console.log('Première ligne de données:', dataLines[0]);
       } else {
         // Fichier SQL - garder l'ancienne logique
         dataLines = lines.filter(line => 
@@ -176,13 +193,14 @@ const ImportData = () => {
         const batch = dataLines.slice(i, i + batchSize);
         const productsToInsert = [];
 
-        for (const line of batch) {
+        for (let j = 0; j < batch.length; j++) {
+          const line = batch[j];
           let product = null;
           
           if (isCSV) {
             // Parser CSV
             const csvRow = parseCSVLine(line, headers);
-            product = parseCSVToProduct(csvRow);
+            product = parseCSVToProduct(csvRow, i + j);
           } else {
             // Parser SQL
             product = parseSQLLine(line);
