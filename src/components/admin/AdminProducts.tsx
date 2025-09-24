@@ -423,14 +423,12 @@ export const AdminProducts = () => {
   }) || []);
 
   const getStockBadgeVariant = (stock: number) => {
-    if (stock === 0) return "destructive";
     if (stock <= 5) return "secondary";
     if (stock <= 10) return "outline";
     return "default";
   };
 
   const getStockBadgeText = (stock: number) => {
-    if (stock === 0) return "Rupture";
     if (stock <= 5) return `Stock faible (${stock})`;
     return `En stock (${stock})`;
   };
@@ -462,7 +460,7 @@ export const AdminProducts = () => {
               size="sm"
               onClick={() => setShowOnlyOutOfStock(!showOnlyOutOfStock)}
             >
-              {showOnlyOutOfStock ? "Tous les produits" : "Produits en rupture"}
+              {showOnlyOutOfStock ? "Tous les produits" : "Stock = 0"}
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -657,7 +655,7 @@ export const AdminProducts = () => {
             {showCSVProducts ? (
               `${filteredProducts.length} produits CSV en attente de synchronisation`
             ) : (
-              `${filteredProducts.length} produits ${showOnlyOutOfStock ? 'en rupture' : 'au total'}`
+              `${filteredProducts.length} produits ${showOnlyOutOfStock ? 'avec stock = 0' : 'au total'}`
             )}
             {showOnlyOutOfStock && products && !showCSVProducts && (
               <span className="text-muted-foreground ml-2">
@@ -780,9 +778,7 @@ export const AdminProducts = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getStockBadgeVariant(product.stock)}>
-                            {getStockBadgeText(product.stock)}
-                          </Badge>
+                          <span className="font-medium">{product.stock}</span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
