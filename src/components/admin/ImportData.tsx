@@ -9,6 +9,7 @@ import { Upload, Database, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCategories } from "@/hooks/useCatalogue";
+import { useCSV } from "@/contexts/CSVContext";
 
 interface ImportDataProps {
   onCSVImport?: (products: any[]) => void;
@@ -17,6 +18,7 @@ interface ImportDataProps {
 const ImportData = ({ onCSVImport }: ImportDataProps) => {
   const { toast } = useToast();
   const { data: categories } = useCategories();
+  const { addCsvProducts } = useCSV();
   const [isImporting, setIsImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [importResults, setImportResults] = useState<{
@@ -308,6 +310,11 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
               allCSVProducts.push(product);
             }
           }
+        }
+
+        // Ajouter les produits CSV au contexte
+        if (allCSVProducts.length > 0) {
+          addCsvProducts(allCSVProducts);
         }
 
         // Appeler la fonction de callback si fournie

@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Plus, Edit, Search, Upload, Trash2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCSV } from "@/contexts/CSVContext";
 import { 
   useCategories, 
   useProduitsCatalogue, 
@@ -27,6 +28,7 @@ import CSVImport from "./CSVImport";
 const AdminCatalogue = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { addCsvProducts } = useCSV();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -169,11 +171,10 @@ const AdminCatalogue = () => {
   };
 
   const handleCSVImport = (products: any[]) => {
-    // Rediriger vers AdminProducts avec les produits CSV
-    // Pour l'instant, on affiche juste un message
+    addCsvProducts(products);
     toast({
       title: "Import CSV réussi",
-      description: `${products.length} produits importés. Utilisez la section Produits pour les synchroniser.`,
+      description: `${products.length} produits importés. Allez dans la section Produits pour les synchroniser.`,
     });
   };
 

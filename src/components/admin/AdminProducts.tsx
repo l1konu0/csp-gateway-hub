@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useCSV } from '@/contexts/CSVContext';
 import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, RefreshCw } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -46,13 +47,13 @@ interface ProduitCSV {
 export const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { csvProducts, clearCsvProducts, removeCsvProduct } = useCSV();
   const [editingProduct, setEditingProduct] = useState<Pneu | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [showOnlyOutOfStock, setShowOnlyOutOfStock] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Pneu | null>(null);
   const [showCSVProducts, setShowCSVProducts] = useState(false);
-  const [csvProducts, setCsvProducts] = useState<ProduitCSV[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [newProduct, setNewProduct] = useState({
     marque: '',
@@ -284,7 +285,6 @@ export const AdminProducts = () => {
   };
 
   const handleCSVImport = (products: ProduitCSV[]) => {
-    setCsvProducts(products);
     setShowCSVProducts(true);
     toast({
       title: "Import CSV réussi",
@@ -298,7 +298,7 @@ export const AdminProducts = () => {
       syncCSVToCatalogueMutation.mutate(csvProducts, {
         onSettled: () => {
           setIsSyncing(false);
-          setCsvProducts([]);
+          clearCsvProducts();
           setShowCSVProducts(false);
         }
       });
@@ -306,8 +306,7 @@ export const AdminProducts = () => {
   };
 
   const handleRemoveCSVProduct = (index: number) => {
-    const newProducts = csvProducts.filter((_, i) => i !== index);
-    setCsvProducts(newProducts);
+    removeCsvProduct(index);
   };
 
   // Filtrer les produits selon le filtre sélectionné
