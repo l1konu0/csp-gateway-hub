@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Grid, List, Filter } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
 import tireSample from '@/assets/tire-sample.jpg';
 
 interface PneusGridProps {
@@ -21,6 +25,11 @@ const PneusGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pneus
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFamille, setSelectedFamille] = useState<string | null>(null);
+  
+  // Hooks pour l'authentification et le panier
+  const { user } = useAuth();
+  const { addToCart, isAddingToCart } = useCart();
+  const { toast } = useToast();
   
   // Récupérer uniquement les pneus (categorie_id = 1) avec stock > 0
   const { data: allProducts = [], isLoading: loading, error } = useRechercherProduits(searchQuery, 'FA0001');
@@ -44,8 +53,20 @@ const PneusGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pneus
   const familles = Object.keys(productsByFamille).sort();
 
   const handleAddToCart = (productId: string) => {
-    console.log("Ajouter au panier:", productId);
-    // TODO: Implement with Supabase
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter pour ajouter des produits au panier.",
+        action: (
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/auth">Se connecter</Link>
+          </Button>
+        ),
+      });
+      return;
+    }
+
+    addToCart({ produitId: parseInt(productId) });
   };
 
   // Convertir les données pour le composant ProductCard

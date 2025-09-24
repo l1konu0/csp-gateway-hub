@@ -5,6 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRechercherProduits, ProduitCatalogue } from "@/hooks/useCatalogue";
+import { useCart } from "@/hooks/useCart";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 import tireSample from "@/assets/tire-sample.jpg";
 
 interface ProductGridProps {
@@ -18,6 +22,11 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
+  // Hooks pour l'authentification et le panier
+  const { user } = useAuth();
+  const { addToCart, isAddingToCart } = useCart();
+  const { toast } = useToast();
+  
   // Utiliser le nouveau hook de recherche dans le catalogue
   const { data: products = [], isLoading: loading, error } = useRechercherProduits(searchQuery, selectedCategory || undefined);
   
@@ -25,8 +34,20 @@ const ProductGrid = ({ searchQuery, compatibleDimensions, selectedVehicle }: Pro
   // TODO: Implémenter la compatibilité des dimensions plus tard
 
   const handleAddToCart = (productId: string) => {
-    console.log("Ajouter au panier:", productId);
-    // TODO: Implement with Supabase
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description: "Vous devez vous connecter pour ajouter des produits au panier.",
+        action: (
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/auth">Se connecter</Link>
+          </Button>
+        ),
+      });
+      return;
+    }
+
+    addToCart({ produitId: parseInt(productId) });
   };
 
   // Convertir les données pour le composant ProductCard
