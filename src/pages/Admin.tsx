@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
-import { AdminProducts } from '@/components/admin/AdminProducts';
+import { AdminCatalogueManager } from '@/components/admin/AdminCatalogueManager';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminUsers } from '@/components/admin/AdminUsers';
 import { AdminVehicles } from '@/components/admin/AdminVehicles';
@@ -79,7 +79,7 @@ const Admin = () => {
                 </TabsTrigger>
                 <TabsTrigger value="products" className="flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Produits
+                  Gestion Produits
                 </TabsTrigger>
                 <TabsTrigger value="vehicles" className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
@@ -112,7 +112,7 @@ const Admin = () => {
               </TabsContent>
 
               <TabsContent value="products" className="mt-6">
-                <AdminProducts />
+                <AdminCatalogueManager />
               </TabsContent>
 
               <TabsContent value="vehicles" className="mt-6">
