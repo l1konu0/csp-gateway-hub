@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import ProductGrid from '@/components/ProductGrid';
+import PneusGrid from '@/components/PneusGrid';
 import { VehicleSelector } from '@/components/VehicleSelector';
 
 const PneusAuto = () => {
@@ -50,8 +50,8 @@ const PneusAuto = () => {
         </div>
       </section>
 
-      {/* Catalogue de produits */}
-      <ProductGrid 
+      {/* Catalogue de pneus */}
+      <PneusGrid 
         searchQuery={searchQuery} 
         compatibleDimensions={compatibleDimensions}
         selectedVehicle={selectedVehicle}
