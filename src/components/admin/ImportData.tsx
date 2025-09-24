@@ -160,6 +160,56 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
     return columnMap;
   };
 
+  // Fonction pour mapper les codes famille vers categorie_id
+  const mapFamilleCodeToCategorieId = (familleCode: string): number => {
+    const familleMap: { [key: string]: number } = {
+      'FA0001': 1, // Pneus
+      'FA0002': 2, // Jantes
+      'FA0003': 3, // Filtres et Huiles
+      'FA0004': 4, // Batteries
+      'FA0005': 5, // Valves et Accessoires
+      'FA0006': 6, // Chambres à Air
+      'LUBR': 7,   // Lubrifiants
+      'ACC': 8     // Accessoires
+    };
+    
+    return familleMap[familleCode] || 1; // Par défaut Pneus
+  };
+
+  // Fonction pour parser votre format SQL spécifique (catalogue_produits.sql)
+  const parseCatalogueSQLLine = (line: string) => {
+    // Parser les lignes INSERT INTO catalogue_produits VALUES (...)
+    const match = line.match(/INSERT INTO catalogue_produits \(code, famille, designation_longue, stock_disponible, prix_achat_ht, remise, marge, prix_vente_ht, taux_tva, prix_vente_ttc\) VALUES \((\d+), '([^']+)', '([^']+)', ([^,]+), ([^,]+), ([^,]+), ([^,]+), ([^,]+), (\d+), ([^)]+)\)/);
+    
+    if (!match) return null;
+    
+    const [, code, famille, designation, stockDispo, prixAchat, remise, marge, prixVente, tauxTva, prixVenteTtc] = match;
+    
+    const categorieId = mapFamilleCodeToCategorieId(famille);
+    
+    // Calculer les valeurs manquantes
+    const stockReel = stockDispo === 'NULL' ? 0 : parseInt(stockDispo);
+    const prixAchatNum = prixAchat === 'NULL' ? 0 : parseFloat(prixAchat);
+    const prixVenteNum = prixVente === 'NULL' ? 0 : parseFloat(prixVente);
+    const valeurStock = stockReel * prixAchatNum;
+    const coefficient = 1.0; // Valeur par défaut
+
+    return {
+      code: parseInt(code),
+      categorie_id: categorieId,
+      designation: designation.replace(/\\/g, ''), // Nettoyer les échappements
+      stock_reel: stockReel,
+      stock_disponible: stockReel, // Même valeur que stock_reel
+      prix_achat: prixAchatNum,
+      prix_moyen_achat: prixAchatNum, // Même valeur que prix_achat
+      prix_vente: prixVenteNum,
+      valeur_stock: valeurStock,
+      taux_tva: parseInt(tauxTva),
+      coefficient: coefficient,
+      actif: true
+    };
+  };
+
   // Fonction pour parser une ligne de données SQL (gardée pour compatibilité)
   const parseSQLLine = (line: string) => {
     // Regex pour extraire les valeurs d'un INSERT
@@ -220,11 +270,19 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
         console.log('Première ligne de données:', dataLines[0]);
         console.log('Mapping des colonnes:', columnMap);
       } else {
-        // Fichier SQL - garder l'ancienne logique
-        dataLines = lines.filter(line => 
-          line.trim().startsWith('INSERT INTO `liste_stock`') ||
-          line.trim().match(/^\(\d+,/)
-        );
+        // Fichier SQL - détecter le format
+        if (lines[0].includes('catalogue_produits')) {
+          // Format catalogue_produits.sql
+          dataLines = lines.filter(line => 
+            line.trim().startsWith('INSERT INTO catalogue_produits')
+          );
+        } else {
+          // Ancien format liste_stock
+          dataLines = lines.filter(line => 
+            line.trim().startsWith('INSERT INTO `liste_stock`') ||
+            line.trim().match(/^\(\d+,/)
+          );
+        }
       }
 
       if (dataLines.length === 0) {
@@ -257,8 +315,12 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
             const columnMap = detectCSVColumns(lines[0]); // Recalculer pour chaque batch
             product = parseCSVToProduct(csvRow, columnMap, i + j);
           } else {
-            // Parser SQL
-            product = parseSQLLine(line);
+            // Parser SQL - détecter le format
+            if (lines[0].includes('catalogue_produits')) {
+              product = parseCatalogueSQLLine(line);
+            } else {
+              product = parseSQLLine(line);
+            }
           }
           
           if (product) {
@@ -298,17 +360,27 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
       });
 
       if (successCount > 0) {
-        // Récupérer tous les produits CSV parsés
+        // Récupérer tous les produits parsés
         const allCSVProducts = [];
         for (let i = 0; i < dataLines.length; i++) {
           const line = dataLines[i];
+          let product = null;
+          
           if (isCSV) {
             const csvRow = parseCSVLine(line, headers);
             const columnMap = detectCSVColumns(lines[0]);
-            const product = parseCSVToProduct(csvRow, columnMap, i);
-            if (product) {
-              allCSVProducts.push(product);
+            product = parseCSVToProduct(csvRow, columnMap, i);
+          } else {
+            // Parser SQL - détecter le format
+            if (lines[0].includes('catalogue_produits')) {
+              product = parseCatalogueSQLLine(line);
+            } else {
+              product = parseSQLLine(line);
             }
+          }
+          
+          if (product) {
+            allCSVProducts.push(product);
           }
         }
 
