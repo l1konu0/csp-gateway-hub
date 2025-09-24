@@ -47,7 +47,7 @@ interface ProduitCSV {
 export const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { csvProducts, clearCsvProducts, removeCsvProduct } = useCSV();
+  const { csvProducts, clearCsvProducts, removeCsvProduct, addCsvProducts } = useCSV();
   
   // Debug: Afficher le nombre de produits CSV
   console.log('AdminProducts - Nombre de produits CSV:', csvProducts.length);
@@ -409,17 +409,40 @@ export const AdminProducts = () => {
               <Upload className="h-4 w-4 mr-2" />
               Produits CSV ({csvProducts.length})
             </Button>
-            {csvProducts.length > 0 && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleSyncToCatalogue}
-                disabled={isSyncing}
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {isSyncing ? "Synchronisation..." : "Synchroniser"}
-              </Button>
-            )}
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleSyncToCatalogue}
+              disabled={isSyncing}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {isSyncing ? "Synchronisation..." : `Synchroniser (${csvProducts.length})`}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Test: ajouter un produit CSV de test
+                const testProduct = {
+                  code: 99999,
+                  categorie_id: 1,
+                  designation: "Test produit CSV",
+                  stock_reel: 10,
+                  stock_disponible: 10,
+                  prix_achat: 100,
+                  prix_moyen_achat: 100,
+                  prix_vente: 150,
+                  valeur_stock: 1000,
+                  taux_tva: 19,
+                  coefficient: 1.5,
+                  actif: true
+                };
+                addCsvProducts([testProduct]);
+                console.log('Produit de test ajouté:', testProduct);
+              }}
+            >
+              Test CSV
+            </Button>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
