@@ -103,41 +103,86 @@ export const AdminCatalogueManager = () => {
   });
 
   // Récupérer les produits du catalogue
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading, error: queryError } = useQuery({
     queryKey: ['catalogue-produits-admin', searchQuery, selectedCategory, showInactive],
     queryFn: async () => {
-      let query = supabase
+      console.log('🔍 Récupération des produits du catalogue...');
+      console.log('📊 Paramètres:', { searchQuery, selectedCategory, showInactive });
+      
+      // D'abord, compter le total
+      const { count: totalCount, error: countError } = await supabase
         .from('catalogue_produits')
-        .select(`
-          *,
-          categories (
-            id,
-            code,
-            nom,
-            description
-          )
-        `)
-        .order('code', { ascending: true })
-        .limit(10000); // Limite élevée pour récupérer tous les produits
-
-      // Filtre par recherche
-      if (searchQuery) {
-        query = query.or(`designation.ilike.%${searchQuery}%,code.eq.${parseInt(searchQuery) || 0}`);
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('❌ Erreur de comptage:', countError);
+        throw countError;
       }
+      
+      console.log('📈 Total des produits dans la base:', totalCount);
+      
+      // Récupérer tous les produits par lots
+      let allProducts: ProduitCatalogue[] = [];
+      const batchSize = 1000;
+      let offset = 0;
+      
+      while (true) {
+        console.log(`📦 Récupération du lot ${Math.floor(offset / batchSize) + 1}...`);
+        
+        let query = supabase
+          .from('catalogue_produits')
+          .select(`
+            *,
+            categories (
+              id,
+              code,
+              nom,
+              description
+            )
+          `)
+          .order('code', { ascending: true })
+          .range(offset, offset + batchSize - 1);
 
-      // Filtre par catégorie
-      if (selectedCategory !== 'all') {
-        query = query.eq('categorie_id', parseInt(selectedCategory));
+        // Filtre par recherche
+        if (searchQuery) {
+          query = query.or(`designation.ilike.%${searchQuery}%,code.eq.${parseInt(searchQuery) || 0}`);
+        }
+
+        // Filtre par catégorie
+        if (selectedCategory !== 'all') {
+          query = query.eq('categorie_id', parseInt(selectedCategory));
+        }
+
+        // Filtre par statut actif
+        if (!showInactive) {
+          query = query.eq('actif', true);
+        }
+
+        const { data: batchData, error: batchError } = await query;
+        
+        if (batchError) {
+          console.error('❌ Erreur de lot:', batchError);
+          throw batchError;
+        }
+        
+        if (!batchData || batchData.length === 0) {
+          console.log('✅ Fin de récupération des lots');
+          break;
+        }
+        
+        allProducts = [...allProducts, ...batchData];
+        console.log(`✅ Lot récupéré: ${batchData.length} produits (Total: ${allProducts.length})`);
+        
+        if (batchData.length < batchSize) {
+          console.log('✅ Dernier lot atteint');
+          break;
+        }
+        
+        offset += batchSize;
       }
-
-      // Filtre par statut actif
-      if (!showInactive) {
-        query = query.eq('actif', true);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data as ProduitCatalogue[];
+      
+      console.log(`🎉 Récupération terminée: ${allProducts.length} produits au total`);
+      return allProducts as ProduitCatalogue[];
     }
   });
 
@@ -324,6 +369,29 @@ export const AdminCatalogueManager = () => {
       <div className="space-y-4">
         <div className="h-8 bg-muted animate-pulse rounded" />
         <div className="h-64 bg-muted animate-pulse rounded" />
+        <div className="text-center text-muted-foreground">
+          <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
+          <p>Chargement des produits du catalogue...</p>
+          <p className="text-sm">Cela peut prendre quelques secondes pour récupérer tous les produits.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (queryError) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-destructive">
+          <p className="text-lg font-semibold">Erreur de chargement</p>
+          <p className="text-sm">{queryError.message}</p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['catalogue-produits-admin'] })}
+            className="mt-4"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Réessayer
+          </Button>
+        </div>
       </div>
     );
   }
