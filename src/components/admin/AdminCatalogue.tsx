@@ -244,6 +244,94 @@ const AdminCatalogue = () => {
     });
   };
 
+  const handleSyncAllToProducts = async () => {
+    try {
+      console.log('Début de la synchronisation de tous les produits du catalogue...');
+      
+      // Récupérer tous les produits du catalogue
+      const { data: catalogueProducts, error } = await supabase
+        .from('catalogue_produits')
+        .select('*')
+        .eq('actif', true);
+      
+      if (error) {
+        console.error('Erreur lors de la récupération:', error);
+        throw error;
+      }
+      
+      console.log('Produits récupérés du catalogue:', catalogueProducts?.length || 0);
+      
+      if (!catalogueProducts || catalogueProducts.length === 0) {
+        toast({
+          title: "Aucun produit",
+          description: "Aucun produit trouvé dans le catalogue.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Convertir tous les produits du catalogue en format pneus
+      const pneusToInsert = catalogueProducts.map(prod => ({
+        marque: prod.designation.split(' ')[0] || 'Marque inconnue',
+        modele: prod.designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu',
+        dimensions: prod.designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues',
+        type: 'pneu',
+        prix: prod.prix_vente,
+        stock: prod.stock_disponible,
+        description: prod.designation,
+        image_url: null
+      }));
+      
+      console.log('Conversion en pneus:', pneusToInsert.slice(0, 3));
+      
+      // Insérer par lots pour éviter les timeouts
+      const batchSize = 100;
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (let i = 0; i < pneusToInsert.length; i += batchSize) {
+        const batch = pneusToInsert.slice(i, i + batchSize);
+        
+        try {
+          const { error: insertError } = await supabase
+            .from('pneus')
+            .upsert(batch, { 
+              onConflict: 'marque,modele,dimensions',
+              ignoreDuplicates: false 
+            });
+          
+          if (insertError) {
+            console.error('Erreur batch', i, ':', insertError);
+            errorCount += batch.length;
+          } else {
+            successCount += batch.length;
+            console.log(`Batch ${i}-${i + batch.length} synchronisé avec succès`);
+          }
+        } catch (batchError) {
+          console.error('Erreur batch', i, ':', batchError);
+          errorCount += batch.length;
+        }
+      }
+      
+      // Invalider les caches
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] });
+      
+      toast({
+        title: "Synchronisation terminée",
+        description: `${successCount} produits synchronisés avec succès. ${errorCount} erreurs.`,
+      });
+      
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+      toast({
+        title: "Erreur de synchronisation",
+        description: `Impossible de synchroniser: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loadingCategories || loadingProduits) {
     return <div>Chargement...</div>;
   }
@@ -323,13 +411,21 @@ const AdminCatalogue = () => {
                 </>
               )}
               {!showDeleteMode && (
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Ajouter Produit
-                  </Button>
-                </DialogTrigger>
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={handleSyncAllToProducts}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Sync Catalogue → Produits
+                </Button>
+                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Ajouter Produit
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>Ajouter un Produit</DialogTitle>
@@ -402,6 +498,7 @@ const AdminCatalogue = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              </>
               )}
             </div>
           </CardTitle>
