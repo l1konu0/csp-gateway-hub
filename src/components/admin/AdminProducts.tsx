@@ -225,16 +225,27 @@ export const AdminProducts = () => {
 
   const syncCSVToCatalogueMutation = useMutation({
     mutationFn: async (products: ProduitCSV[]) => {
-      const { error } = await supabase
+      console.log('Début de synchronisation de', products.length, 'produits');
+      console.log('Premier produit à synchroniser:', products[0]);
+      
+      const { data, error } = await supabase
         .from('catalogue_produits')
         .upsert(products, { 
           onConflict: 'code',
           ignoreDuplicates: false 
         });
 
-      if (error) throw error;
+      console.log('Résultat de la synchronisation:', { data, error });
+
+      if (error) {
+        console.error('Erreur de synchronisation:', error);
+        throw error;
+      }
+      
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Synchronisation réussie:', data);
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['pneus'] });
       queryClient.invalidateQueries({ queryKey: ['catalogue-produits'] });
@@ -244,9 +255,10 @@ export const AdminProducts = () => {
       });
     },
     onError: (error) => {
+      console.error('Erreur de synchronisation:', error);
       toast({
         title: "Erreur de synchronisation",
-        description: "Impossible de synchroniser les produits CSV.",
+        description: `Impossible de synchroniser les produits CSV: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -296,14 +308,39 @@ export const AdminProducts = () => {
   };
 
   const handleSyncToCatalogue = () => {
+    console.log('Tentative de synchronisation de', csvProducts.length, 'produits');
     if (csvProducts.length > 0) {
+      // Valider la structure des produits
+      const invalidProducts = csvProducts.filter(p => 
+        !p.code || !p.categorie_id || !p.designation
+      );
+      
+      if (invalidProducts.length > 0) {
+        console.error('Produits invalides trouvés:', invalidProducts);
+        toast({
+          title: "Erreur de validation",
+          description: `${invalidProducts.length} produits ont des données manquantes.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Tous les produits sont valides, début de la synchronisation');
       setIsSyncing(true);
       syncCSVToCatalogueMutation.mutate(csvProducts, {
         onSettled: () => {
+          console.log('Synchronisation terminée');
           setIsSyncing(false);
           clearCsvProducts();
           setShowCSVProducts(false);
         }
+      });
+    } else {
+      console.log('Aucun produit CSV à synchroniser');
+      toast({
+        title: "Aucun produit",
+        description: "Aucun produit CSV à synchroniser.",
+        variant: "destructive",
       });
     }
   };
