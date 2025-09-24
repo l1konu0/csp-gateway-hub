@@ -93,10 +93,43 @@ const AdminCatalogue = () => {
 
   const handleAddProduct = async () => {
     try {
+      // Ajouter le produit au catalogue
       await ajouterProduit.mutateAsync(newProduct);
+      
+      // Synchroniser vers la table pneus si c'est un pneu
+      if (newProduct.categorie_id === 1) { // Catégorie Pneus
+        try {
+          const pneuData = {
+            marque: newProduct.designation.split(' ')[0] || 'Marque inconnue',
+            modele: newProduct.designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu',
+            dimensions: newProduct.designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues',
+            type: 'pneu',
+            prix: newProduct.prix_vente,
+            stock: newProduct.stock_disponible,
+            description: newProduct.designation,
+            image_url: null
+          };
+          
+          const { error: pneuError } = await supabase
+            .from('pneus')
+            .upsert(pneuData, { 
+              onConflict: 'marque,modele,dimensions',
+              ignoreDuplicates: false 
+            });
+          
+          if (pneuError) {
+            console.error('Erreur synchronisation pneu:', pneuError);
+          } else {
+            console.log('Produit synchronisé vers pneus:', pneuData);
+          }
+        } catch (syncError) {
+          console.error('Erreur lors de la synchronisation:', syncError);
+        }
+      }
+      
       toast({
         title: "Succès",
-        description: "Produit ajouté avec succès",
+        description: "Produit ajouté avec succès et synchronisé",
       });
       setIsAddDialogOpen(false);
       setNewProduct({
@@ -126,10 +159,43 @@ const AdminCatalogue = () => {
     if (!editingProduct) return;
     
     try {
+      // Mettre à jour le produit dans le catalogue
       await mettreAJourProduit.mutateAsync(editingProduct);
+      
+      // Synchroniser vers la table pneus si c'est un pneu
+      if (editingProduct.categorie_id === 1) { // Catégorie Pneus
+        try {
+          const pneuData = {
+            marque: editingProduct.designation.split(' ')[0] || 'Marque inconnue',
+            modele: editingProduct.designation.split(' ').slice(1, 3).join(' ') || 'Modèle inconnu',
+            dimensions: editingProduct.designation.match(/\d+\/\d+R\d+/)?.[0] || 'Dimensions inconnues',
+            type: 'pneu',
+            prix: editingProduct.prix_vente,
+            stock: editingProduct.stock_disponible,
+            description: editingProduct.designation,
+            image_url: null
+          };
+          
+          const { error: pneuError } = await supabase
+            .from('pneus')
+            .upsert(pneuData, { 
+              onConflict: 'marque,modele,dimensions',
+              ignoreDuplicates: false 
+            });
+          
+          if (pneuError) {
+            console.error('Erreur synchronisation pneu:', pneuError);
+          } else {
+            console.log('Produit mis à jour et synchronisé vers pneus:', pneuData);
+          }
+        } catch (syncError) {
+          console.error('Erreur lors de la synchronisation:', syncError);
+        }
+      }
+      
       toast({
         title: "Succès",
-        description: "Produit modifié avec succès",
+        description: "Produit modifié avec succès et synchronisé",
       });
       setIsEditDialogOpen(false);
       setEditingProduct(null);
