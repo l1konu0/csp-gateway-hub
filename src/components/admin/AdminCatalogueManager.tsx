@@ -581,7 +581,7 @@ export const AdminCatalogueManager = () => {
               <div className="flex-1">
                 <p className="text-sm font-medium text-muted-foreground">Total produits actifs</p>
                 <p className="text-2xl font-bold text-blue-600">{activeProducts}</p>
-                <p className="text-xs text-muted-foreground">Actifs (stock > 0 + stock = 0)</p>
+                <p className="text-xs text-muted-foreground">Actifs (stock supérieur à 0 + stock = 0)</p>
               </div>
               <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <Package className="h-4 w-4 text-blue-600" />
