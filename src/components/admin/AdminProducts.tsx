@@ -12,8 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Package, Save, X, Trash2, Filter } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Pneu {
   id: number;
@@ -173,50 +171,28 @@ export const AdminProducts = () => {
     },
   });
 
-<<<<<<< HEAD
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: number) => {
       const { error } = await supabase
         .from('pneus')
         .delete()
         .eq('id', productId);
-=======
-  const deleteProductsMutation = useMutation({
-    mutationFn: async (productIds: number[]) => {
-      const { error } = await supabase
-        .from('pneus')
-        .delete()
-        .in('id', productIds);
->>>>>>> 5ec9ae76dcb74645cf7cf0413f52bc3af8a1ac86
 
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-<<<<<<< HEAD
       queryClient.invalidateQueries({ queryKey: ['pneus'] }); // Invalider aussi pour le site public
       setProductToDelete(null);
       toast({
         title: "Produit supprimé",
         description: "Le produit a été supprimé avec succès.",
-=======
-      queryClient.invalidateQueries({ queryKey: ['pneus'] });
-      setSelectedProducts([]);
-      setShowDeleteMode(false);
-      toast({
-        title: "Produits supprimés",
-        description: `${selectedProducts.length} produit(s) supprimé(s) avec succès.`,
->>>>>>> 5ec9ae76dcb74645cf7cf0413f52bc3af8a1ac86
       });
     },
     onError: (error) => {
       toast({
         title: "Erreur",
-<<<<<<< HEAD
         description: "Impossible de supprimer le produit.",
-=======
-        description: "Impossible de supprimer les produits.",
->>>>>>> 5ec9ae76dcb74645cf7cf0413f52bc3af8a1ac86
         variant: "destructive",
       });
     },
@@ -278,28 +254,6 @@ export const AdminProducts = () => {
     return `En stock (${stock})`;
   };
 
-  const handleSelectProduct = (productId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedProducts([...selectedProducts, productId]);
-    } else {
-      setSelectedProducts(selectedProducts.filter(id => id !== productId));
-    }
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedProducts(products?.map(p => p.id) || []);
-    } else {
-      setSelectedProducts([]);
-    }
-  };
-
-  const handleDeleteSelected = () => {
-    if (selectedProducts.length > 0) {
-      deleteProductsMutation.mutate(selectedProducts);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -318,7 +272,6 @@ export const AdminProducts = () => {
             Gérez votre stock et vos prix
           </p>
         </div>
-<<<<<<< HEAD
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
@@ -331,64 +284,6 @@ export const AdminProducts = () => {
             </Button>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-=======
-        <div className="flex gap-2">
-          {!showDeleteMode ? (
-            <>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowDeleteMode(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer
-              </Button>
-            </>
-          ) : (
-            <>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button 
-                    variant="destructive" 
-                    disabled={selectedProducts.length === 0}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer ({selectedProducts.length})
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Êtes-vous sûr de vouloir supprimer {selectedProducts.length} produit(s) ? 
-                      Cette action est irréversible.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={handleDeleteSelected}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Supprimer
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setShowDeleteMode(false);
-                  setSelectedProducts([]);
-                }}
-              >
-                <X className="h-4 w-4 mr-2" />
-                Annuler
-              </Button>
-            </>
-          )}
-        </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
->>>>>>> 5ec9ae76dcb74645cf7cf0413f52bc3af8a1ac86
           <DialogTrigger asChild>
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
@@ -537,14 +432,6 @@ export const AdminProducts = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {showDeleteMode && (
-                    <TableHead className="w-12">
-                      <Checkbox 
-                        checked={selectedProducts.length === products?.length}
-                        onCheckedChange={handleSelectAll}
-                      />
-                    </TableHead>
-                  )}
                   <TableHead>Produit</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Prix (TND)</TableHead>
@@ -556,14 +443,6 @@ export const AdminProducts = () => {
               <TableBody>
                 {filteredProducts.map((product) => (
                   <TableRow key={product.id}>
-                    {showDeleteMode && (
-                      <TableCell>
-                        <Checkbox 
-                          checked={selectedProducts.includes(product.id)}
-                          onCheckedChange={(checked) => handleSelectProduct(product.id, checked as boolean)}
-                        />
-                      </TableCell>
-                    )}
                     <TableCell>
                       <div>
                         <div className="font-medium">
