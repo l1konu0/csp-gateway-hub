@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, Sync } from 'lucide-react';
+import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, RefreshCw } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Pneu {
@@ -376,7 +376,7 @@ export const AdminProducts = () => {
                 onClick={handleSyncToCatalogue}
                 disabled={isSyncing}
               >
-                <Sync className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 {isSyncing ? "Synchronisation..." : "Synchroniser"}
               </Button>
             )}
