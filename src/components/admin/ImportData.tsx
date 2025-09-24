@@ -10,7 +10,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCategories } from "@/hooks/useCatalogue";
 
-const ImportData = () => {
+interface ImportDataProps {
+  onCSVImport?: (products: any[]) => void;
+}
+
+const ImportData = ({ onCSVImport }: ImportDataProps) => {
   const { toast } = useToast();
   const { data: categories } = useCategories();
   const [isImporting, setIsImporting] = useState(false);
@@ -292,6 +296,25 @@ const ImportData = () => {
       });
 
       if (successCount > 0) {
+        // Récupérer tous les produits CSV parsés
+        const allCSVProducts = [];
+        for (let i = 0; i < dataLines.length; i++) {
+          const line = dataLines[i];
+          if (isCSV) {
+            const csvRow = parseCSVLine(line, headers);
+            const columnMap = detectCSVColumns(lines[0]);
+            const product = parseCSVToProduct(csvRow, columnMap, i);
+            if (product) {
+              allCSVProducts.push(product);
+            }
+          }
+        }
+
+        // Appeler la fonction de callback si fournie
+        if (onCSVImport && allCSVProducts.length > 0) {
+          onCSVImport(allCSVProducts);
+        }
+
         toast({
           title: "Import terminé",
           description: `${successCount} produits importés avec succès`,

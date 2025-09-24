@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Package, Save, X, Trash2, Filter } from 'lucide-react';
+import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, Sync } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Pneu {
@@ -25,6 +25,24 @@ interface Pneu {
   image_url: string | null;
 }
 
+interface ProduitCSV {
+  id?: number;
+  code: number;
+  famille: string;
+  designation: string;
+  stock_reel: number;
+  stock_disponible: number;
+  prix_achat: number;
+  prix_moyen_achat: number;
+  prix_vente: number;
+  valeur_stock: number;
+  taux_tva: number;
+  coefficient: number;
+  categorie_id: number;
+  actif: boolean;
+  synced?: boolean;
+}
+
 export const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -33,6 +51,9 @@ export const AdminProducts = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [showOnlyOutOfStock, setShowOnlyOutOfStock] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Pneu | null>(null);
+  const [showCSVProducts, setShowCSVProducts] = useState(false);
+  const [csvProducts, setCsvProducts] = useState<ProduitCSV[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [newProduct, setNewProduct] = useState({
     marque: '',
     modele: '',
@@ -198,6 +219,35 @@ export const AdminProducts = () => {
     },
   });
 
+  const syncCSVToCatalogueMutation = useMutation({
+    mutationFn: async (products: ProduitCSV[]) => {
+      const { error } = await supabase
+        .from('catalogue_produits')
+        .upsert(products, { 
+          onConflict: 'code',
+          ignoreDuplicates: false 
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['pneus'] });
+      queryClient.invalidateQueries({ queryKey: ['catalogue-produits'] });
+      toast({
+        title: "Synchronisation réussie",
+        description: "Les produits CSV ont été synchronisés avec le catalogue.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erreur de synchronisation",
+        description: "Impossible de synchroniser les produits CSV.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStockChange = (product: Pneu, change: number) => {
     const newStock = Math.max(0, product.stock + change);
     updateStockMutation.mutate({ id: product.id, newStock });
@@ -233,13 +283,40 @@ export const AdminProducts = () => {
     }
   };
 
+  const handleCSVImport = (products: ProduitCSV[]) => {
+    setCsvProducts(products);
+    setShowCSVProducts(true);
+    toast({
+      title: "Import CSV réussi",
+      description: `${products.length} produits importés depuis le CSV.`,
+    });
+  };
+
+  const handleSyncToCatalogue = () => {
+    if (csvProducts.length > 0) {
+      setIsSyncing(true);
+      syncCSVToCatalogueMutation.mutate(csvProducts, {
+        onSettled: () => {
+          setIsSyncing(false);
+          setCsvProducts([]);
+          setShowCSVProducts(false);
+        }
+      });
+    }
+  };
+
+  const handleRemoveCSVProduct = (index: number) => {
+    const newProducts = csvProducts.filter((_, i) => i !== index);
+    setCsvProducts(newProducts);
+  };
+
   // Filtrer les produits selon le filtre sélectionné
-  const filteredProducts = products?.filter(product => {
+  const filteredProducts = showCSVProducts ? csvProducts : (products?.filter(product => {
     if (showOnlyOutOfStock) {
       return product.stock === 0;
     }
     return true;
-  }) || [];
+  }) || []);
 
   const getStockBadgeVariant = (stock: number) => {
     if (stock === 0) return "destructive";
@@ -282,6 +359,27 @@ export const AdminProducts = () => {
             >
               {showOnlyOutOfStock ? "Tous les produits" : "Produits en rupture"}
             </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showCSVProducts ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowCSVProducts(!showCSVProducts)}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Produits CSV ({csvProducts.length})
+            </Button>
+            {csvProducts.length > 0 && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSyncToCatalogue}
+                disabled={isSyncing}
+              >
+                <Sync className="h-4 w-4 mr-2" />
+                {isSyncing ? "Synchronisation..." : "Synchroniser"}
+              </Button>
+            )}
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -419,8 +517,12 @@ export const AdminProducts = () => {
             Catalogue produits
           </CardTitle>
           <CardDescription>
-            {filteredProducts.length} produits {showOnlyOutOfStock ? 'en rupture' : 'au total'}
-            {showOnlyOutOfStock && products && (
+            {showCSVProducts ? (
+              `${filteredProducts.length} produits CSV en attente de synchronisation`
+            ) : (
+              `${filteredProducts.length} produits ${showOnlyOutOfStock ? 'en rupture' : 'au total'}`
+            )}
+            {showOnlyOutOfStock && products && !showCSVProducts && (
               <span className="text-muted-foreground ml-2">
                 (sur {products.length} produits total)
               </span>
@@ -432,94 +534,143 @@ export const AdminProducts = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Prix (TND)</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
+                  {showCSVProducts ? (
+                    <>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Famille</TableHead>
+                      <TableHead>Désignation</TableHead>
+                      <TableHead>Prix Vente</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </>
+                  ) : (
+                    <>
+                      <TableHead>Produit</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Prix (TND)</TableHead>
+                      <TableHead>Stock</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">
-                          {product.marque} {product.modele}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {product.dimensions}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{product.type}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          defaultValue={product.prix}
-                          className="w-20"
-                          min="0"
-                          step="0.001"
-                          onBlur={(e) => {
-                            const newPrice = parseFloat(e.target.value);
-                            if (newPrice !== product.prix && newPrice > 0) {
-                              handlePriceUpdate(product.id, newPrice);
-                            }
-                          }}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleStockChange(product, -1)}
-                          disabled={product.stock === 0}
-                        >
-                          -
-                        </Button>
-                        <span className="w-8 text-center">{product.stock}</span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleStockChange(product, 1)}
-                        >
-                          +
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStockBadgeVariant(product.stock)}>
-                        {getStockBadgeText(product.stock)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            setEditingProduct(product);
-                            setIsDialogOpen(true);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setProductToDelete(product)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                {filteredProducts.map((product, index) => (
+                  <TableRow key={showCSVProducts ? `csv-${index}` : product.id}>
+                    {showCSVProducts ? (
+                      // Affichage pour les produits CSV
+                      <>
+                        <TableCell>
+                          <div className="font-medium">{product.code}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{product.famille}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-xs truncate" title={product.designation}>
+                            {product.designation}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{product.prix_vente.toFixed(3)} TND</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-center">{product.stock_reel}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveCSVProduct(index)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </>
+                    ) : (
+                      // Affichage pour les produits normaux
+                      <>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">
+                              {product.marque} {product.modele}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {product.dimensions}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{product.type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              defaultValue={product.prix}
+                              className="w-20"
+                              min="0"
+                              step="0.001"
+                              onBlur={(e) => {
+                                const newPrice = parseFloat(e.target.value);
+                                if (newPrice !== product.prix && newPrice > 0) {
+                                  handlePriceUpdate(product.id, newPrice);
+                                }
+                              }}
+                            />
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStockChange(product, -1)}
+                              disabled={product.stock === 0}
+                            >
+                              -
+                            </Button>
+                            <span className="w-8 text-center">{product.stock}</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleStockChange(product, 1)}
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStockBadgeVariant(product.stock)}>
+                            {getStockBadgeText(product.stock)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingProduct(product);
+                                setIsDialogOpen(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setProductToDelete(product)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

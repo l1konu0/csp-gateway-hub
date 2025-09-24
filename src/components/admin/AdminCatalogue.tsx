@@ -28,10 +28,10 @@ const AdminCatalogue = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProduitCatalogue | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showImport, setShowImport] = useState(false);
   const [showCSVImport, setShowCSVImport] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showDeleteMode, setShowDeleteMode] = useState(false);
@@ -166,6 +166,15 @@ const AdminCatalogue = () => {
     if (selectedProducts.length > 0) {
       deleteProductsMutation.mutate(selectedProducts);
     }
+  };
+
+  const handleCSVImport = (products: any[]) => {
+    // Rediriger vers AdminProducts avec les produits CSV
+    // Pour l'instant, on affiche juste un message
+    toast({
+      title: "Import CSV réussi",
+      description: `${products.length} produits importés. Utilisez la section Produits pour les synchroniser.`,
+    });
   };
 
   if (loadingCategories || loadingProduits) {
@@ -333,7 +342,7 @@ const AdminCatalogue = () => {
         <CardContent>
           {showImport && (
             <div className="mb-6">
-              <ImportData />
+              <ImportData onCSVImport={handleCSVImport} />
             </div>
           )}
           
