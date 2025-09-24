@@ -197,6 +197,7 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
     return {
       code: parseInt(code),
       categorie_id: categorieId,
+      famille: famille, // Ajouter la famille !
       designation: designation.replace(/\\/g, ''), // Nettoyer les échappements
       stock_reel: stockReel,
       stock_disponible: stockReel, // Même valeur que stock_reel
