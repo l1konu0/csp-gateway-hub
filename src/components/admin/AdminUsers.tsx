@@ -2,8 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Users } from 'lucide-react';
+import { Users, Building2, User } from 'lucide-react';
+import { useState } from 'react';
 
 interface UserProfile {
   id: string;
@@ -13,11 +15,18 @@ interface UserProfile {
   adresse: string | null;
   ville: string | null;
   code_postal: string | null;
+  raison_sociale: string | null;
+  secteur_activite: string | null;
+  siret: string | null;
+  tva_intracommunautaire: string | null;
+  type_compte: 'particulier' | 'societe';
   created_at: string;
   user_roles: Array<{ role: string }>;
 }
 
 export const AdminUsers = () => {
+  const [filterType, setFilterType] = useState<'all' | 'particulier' | 'societe'>('all');
+
   const { data: users, isLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
@@ -67,6 +76,46 @@ export const AdminUsers = () => {
     return roleNames.join(', ');
   };
 
+  const getAccountTypeBadge = (typeCompte: 'particulier' | 'societe') => {
+    switch (typeCompte) {
+      case 'societe':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">🏢 Professionnel</Badge>;
+      case 'particulier':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">👤 Particulier</Badge>;
+      default:
+        return <Badge variant="secondary">Inconnu</Badge>;
+    }
+  };
+
+  const getDisplayName = (user: UserProfile) => {
+    if (user.type_compte === 'societe' && user.raison_sociale) {
+      return user.raison_sociale;
+    }
+    return `${user.prenom || ''} ${user.nom || ''}`.trim() || 'Nom non renseigné';
+  };
+
+  const getContactInfo = (user: UserProfile) => {
+    const info = [];
+    if (user.telephone) info.push(`📞 ${user.telephone}`);
+    if (user.type_compte === 'societe' && user.siret) info.push(`🏢 SIRET: ${user.siret}`);
+    return info.length > 0 ? info.join(' • ') : 'Aucun contact';
+  };
+
+  const getAddressInfo = (user: UserProfile) => {
+    const address = [];
+    if (user.adresse) address.push(user.adresse);
+    if (user.ville && user.code_postal) {
+      address.push(`${user.code_postal} ${user.ville}`);
+    }
+    return address.length > 0 ? address.join(', ') : 'Adresse non renseignée';
+  };
+
+  // Filtrer les utilisateurs selon le type sélectionné
+  const filteredUsers = users?.filter(user => {
+    if (filterType === 'all') return true;
+    return user.type_compte === filterType;
+  }) || [];
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -85,6 +134,34 @@ export const AdminUsers = () => {
         </p>
       </div>
 
+      {/* Filtres */}
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant={filterType === 'all' ? 'default' : 'outline'}
+          onClick={() => setFilterType('all')}
+          className="flex items-center gap-2"
+        >
+          <Users className="h-4 w-4" />
+          Tous ({users?.length || 0})
+        </Button>
+        <Button
+          variant={filterType === 'societe' ? 'default' : 'outline'}
+          onClick={() => setFilterType('societe')}
+          className="flex items-center gap-2"
+        >
+          <Building2 className="h-4 w-4" />
+          Professionnels ({users?.filter(u => u.type_compte === 'societe').length || 0})
+        </Button>
+        <Button
+          variant={filterType === 'particulier' ? 'default' : 'outline'}
+          onClick={() => setFilterType('particulier')}
+          className="flex items-center gap-2"
+        >
+          <User className="h-4 w-4" />
+          Particuliers ({users?.filter(u => u.type_compte === 'particulier').length || 0})
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -92,45 +169,70 @@ export const AdminUsers = () => {
             Utilisateurs inscrits
           </CardTitle>
           <CardDescription>
-            {users?.length || 0} utilisateurs au total
+            {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''} affiché{filteredUsers.length > 1 ? 's' : ''} 
+            {filterType !== 'all' && ` (${filterType === 'societe' ? 'professionnels' : 'particuliers'})`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {users && users.length > 0 ? (
+          {filteredUsers && filteredUsers.length > 0 ? (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom complet</TableHead>
+                    <TableHead>Nom / Raison sociale</TableHead>
+                    <TableHead>Type de compte</TableHead>
                     <TableHead>Contact</TableHead>
                     <TableHead>Adresse</TableHead>
+                    <TableHead>Informations professionnelles</TableHead>
                     <TableHead>Rôle</TableHead>
                     <TableHead>Inscription</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="font-medium">
-                          {user.prenom} {user.nom}
+                          {getDisplayName(user)}
+                        </div>
+                        {user.type_compte === 'societe' && user.secteur_activite && (
+                          <div className="text-sm text-muted-foreground">
+                            Secteur: {user.secteur_activite}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getAccountTypeBadge(user.type_compte)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {getContactInfo(user)}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {user.telephone && (
-                            <div>{user.telephone}</div>
-                          )}
+                          {getAddressInfo(user)}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">
-                          {user.adresse && (
-                            <div>{user.adresse}</div>
+                        <div className="text-sm space-y-1">
+                          {user.type_compte === 'societe' && (
+                            <>
+                              {user.siret && (
+                                <div className="text-xs text-muted-foreground">
+                                  SIRET: {user.siret}
+                                </div>
+                              )}
+                              {user.tva_intracommunautaire && (
+                                <div className="text-xs text-muted-foreground">
+                                  TVA: {user.tva_intracommunautaire}
+                                </div>
+                              )}
+                            </>
                           )}
-                          {user.ville && user.code_postal && (
-                            <div className="text-muted-foreground">
-                              {user.code_postal} {user.ville}
+                          {user.type_compte === 'particulier' && (
+                            <div className="text-xs text-muted-foreground">
+                              Compte particulier
                             </div>
                           )}
                         </div>
