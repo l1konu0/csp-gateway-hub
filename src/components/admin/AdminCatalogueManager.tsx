@@ -311,6 +311,13 @@ export const AdminCatalogueManager = () => {
     return true;
   });
 
+  // Calculer les statistiques
+  const totalProducts = products.length;
+  const activeProducts = products.filter(p => p.actif).length;
+  const productsInStock = products.filter(p => p.actif && p.stock_disponible > 0).length;
+  const productsOutOfStock = products.filter(p => p.actif && p.stock_disponible === 0).length;
+  const inactiveProducts = products.filter(p => !p.actif).length;
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -536,6 +543,69 @@ export const AdminCatalogueManager = () => {
         </CardContent>
       </Card>
 
+      {/* Statistiques des produits */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Produits visibles sur le site</p>
+                <p className="text-2xl font-bold text-green-600">{productsInStock}</p>
+                <p className="text-xs text-muted-foreground">En stock et actifs</p>
+              </div>
+              <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                <Package className="h-4 w-4 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Produits en rupture</p>
+                <p className="text-2xl font-bold text-orange-600">{productsOutOfStock}</p>
+                <p className="text-xs text-muted-foreground">Actifs mais stock = 0</p>
+              </div>
+              <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <Package className="h-4 w-4 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Total produits actifs</p>
+                <p className="text-2xl font-bold text-blue-600">{activeProducts}</p>
+                <p className="text-xs text-muted-foreground">Actifs (stock > 0 + stock = 0)</p>
+              </div>
+              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <Package className="h-4 w-4 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-muted-foreground">Total catalogue</p>
+                <p className="text-2xl font-bold text-gray-600">{totalProducts}</p>
+                <p className="text-xs text-muted-foreground">Actifs + Inactifs</p>
+              </div>
+              <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <Package className="h-4 w-4 text-gray-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Tableau des produits */}
       <Card>
         <CardHeader>
@@ -587,7 +657,17 @@ export const AdminCatalogueManager = () => {
                       <div className="font-medium">{product.prix_vente.toFixed(3)} TND</div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-center">{product.stock_disponible}</div>
+                      <div className="text-center">
+                        {product.stock_disponible > 0 ? (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            {product.stock_disponible}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-orange-600 border-orange-300">
+                            {product.stock_disponible}
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Button
