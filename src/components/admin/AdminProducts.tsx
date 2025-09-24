@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCSV } from '@/contexts/CSVContext';
+import { TestCSV } from './TestCSV';
 import { Plus, Edit, Package, Save, X, Trash2, Filter, Upload, Download, RefreshCw } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -344,6 +345,7 @@ export const AdminProducts = () => {
 
   return (
     <div className="space-y-6">
+      <TestCSV />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Gestion des produits</h2>
