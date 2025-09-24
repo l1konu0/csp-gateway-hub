@@ -209,7 +209,7 @@ const ImportData = ({ onCSVImport }: ImportDataProps) => {
         isCSV = true;
         // Parser la première ligne pour obtenir les headers
         const firstLineValues = parseCSVLine(lines[0], []);
-        headers = firstLineValues.map((_, i) => `col${i}`);
+        headers = (firstLineValues || []).map((_, i) => `col${i}`);
         dataLines = lines.slice(1);
         
         // Détecter automatiquement les colonnes

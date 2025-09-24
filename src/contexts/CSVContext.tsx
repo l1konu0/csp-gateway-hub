@@ -31,6 +31,9 @@ const CSVContext = createContext<CSVContextType | undefined>(undefined);
 export const CSVProvider = ({ children }: { children: ReactNode }) => {
   // Version 1.0 - Système de communication CSV
   const [csvProducts, setCsvProducts] = useState<ProduitCSV[]>([]);
+  
+  // Debug: Afficher le nombre de produits CSV
+  console.log('CSVProvider - Nombre de produits CSV:', csvProducts.length);
 
   const addCsvProducts = (products: ProduitCSV[]) => {
     setCsvProducts(prev => [...prev, ...products]);
