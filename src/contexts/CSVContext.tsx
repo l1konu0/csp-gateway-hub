@@ -29,6 +29,7 @@ interface CSVContextType {
 const CSVContext = createContext<CSVContextType | undefined>(undefined);
 
 export const CSVProvider = ({ children }: { children: ReactNode }) => {
+  // Version 1.0 - Système de communication CSV
   const [csvProducts, setCsvProducts] = useState<ProduitCSV[]>([]);
 
   const addCsvProducts = (products: ProduitCSV[]) => {
