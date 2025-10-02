@@ -34,6 +34,10 @@ export const useAuth = () => {
     loading: true,
   });
 
+  // Flags pour éviter les requêtes multiples
+  const [profileFetched, setProfileFetched] = useState(false);
+  const [roleChecked, setRoleChecked] = useState(false);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -45,11 +49,17 @@ export const useAuth = () => {
         setState(prev => ({ ...prev, session, user: session?.user ?? null }));
         
         if (session?.user) {
-          // Only fetch if we don't already have the data
-          if (!state.profile) {
+          // Reset flags when user changes
+          if (state.user?.id !== session.user.id) {
+            setProfileFetched(false);
+            setRoleChecked(false);
+          }
+          
+          // Only fetch if not already fetched
+          if (!profileFetched) {
             fetchUserProfile(session.user.id);
           }
-          if (!state.isAdmin) {
+          if (!roleChecked) {
             checkUserRole(session.user.id);
           }
         } else {
@@ -59,6 +69,8 @@ export const useAuth = () => {
             isAdmin: false, 
             loading: false 
           }));
+          setProfileFetched(false);
+          setRoleChecked(false);
         }
       }
     );
@@ -81,12 +93,14 @@ export const useAuth = () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [state.user?.id, profileFetched, roleChecked]);
 
   const fetchUserProfile = async (userId: string) => {
     try {
       // Prevent multiple simultaneous requests
-      if (state.loading && state.profile) return;
+      if (profileFetched) return;
+      
+      setProfileFetched(true);
       
       const { data, error } = await supabase
         .from('profiles')
@@ -96,18 +110,22 @@ export const useAuth = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
+        setProfileFetched(false); // Reset flag on error
       } else {
         setState(prev => ({ ...prev, profile: data }));
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setProfileFetched(false); // Reset flag on error
     }
   };
 
   const checkUserRole = async (userId: string) => {
     try {
       // Prevent multiple simultaneous requests
-      if (state.loading && state.isAdmin !== null) return;
+      if (roleChecked) return;
+      
+      setRoleChecked(true);
       
       const { data, error } = await supabase
         .from('user_roles')
@@ -123,6 +141,7 @@ export const useAuth = () => {
       }));
     } catch (error) {
       setState(prev => ({ ...prev, isAdmin: false, loading: false }));
+      setRoleChecked(false); // Reset flag on error
     }
   };
 
