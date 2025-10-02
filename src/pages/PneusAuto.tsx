@@ -1,13 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PneusGrid from '@/components/PneusGrid';
 import { VehicleSelector } from '@/components/VehicleSelector';
 
 const PneusAuto = () => {
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [compatibleDimensions, setCompatibleDimensions] = useState<string[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<{marque: string; modele: string; annee: number} | null>(null);
+
+  // Gérer les paramètres de recherche depuis l'URL
+  useEffect(() => {
+    const width = searchParams.get('width');
+    const height = searchParams.get('height');
+    const diameter = searchParams.get('diameter');
+    
+    if (width && height && diameter) {
+      // Construire une requête de recherche basée sur les dimensions
+      const dimensionQuery = `${width}/${height}R${diameter}`;
+      setSearchQuery(dimensionQuery);
+      setCompatibleDimensions([dimensionQuery]);
+    }
+  }, [searchParams]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

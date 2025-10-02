@@ -15,10 +15,10 @@ const Hero = () => {
   const handleSearch = () => {
     if (tireSize.width && tireSize.height && tireSize.diameter) {
       // Rediriger vers la page des pneus avec les paramètres de recherche
-      navigate(`/pneus?width=${tireSize.width}&height=${tireSize.height}&diameter=${tireSize.diameter}`);
+      navigate(`/pneus-auto?width=${tireSize.width}&height=${tireSize.height}&diameter=${tireSize.diameter}`);
     } else {
       // Rediriger vers la page des pneus sans filtres
-      navigate('/pneus');
+      navigate('/pneus-auto');
     }
   };
   return (
