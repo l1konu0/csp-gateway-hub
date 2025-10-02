@@ -35,17 +35,23 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let isMounted = true;
+    
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        
         setState(prev => ({ ...prev, session, user: session?.user ?? null }));
         
         if (session?.user) {
-          // Defer Supabase calls with setTimeout to avoid deadlock
-          setTimeout(() => {
+          // Only fetch if we don't already have the data
+          if (!state.profile) {
             fetchUserProfile(session.user.id);
+          }
+          if (!state.isAdmin) {
             checkUserRole(session.user.id);
-          }, 0);
+          }
         } else {
           setState(prev => ({ 
             ...prev, 
@@ -57,25 +63,31 @@ export const useAuth = () => {
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!isMounted) return;
+      
       setState(prev => ({ ...prev, session, user: session?.user ?? null }));
       
       if (session?.user) {
-        setTimeout(() => {
-          fetchUserProfile(session.user.id);
-          checkUserRole(session.user.id);
-        }, 0);
+        fetchUserProfile(session.user.id);
+        checkUserRole(session.user.id);
       } else {
         setState(prev => ({ ...prev, loading: false }));
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      // Prevent multiple simultaneous requests
+      if (state.loading && state.profile) return;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -94,6 +106,9 @@ export const useAuth = () => {
 
   const checkUserRole = async (userId: string) => {
     try {
+      // Prevent multiple simultaneous requests
+      if (state.loading && state.isAdmin !== null) return;
+      
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')

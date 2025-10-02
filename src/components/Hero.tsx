@@ -1,8 +1,26 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search, Shield, Truck, Wrench } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+  const [tireSize, setTireSize] = useState({
+    width: '',
+    height: '',
+    diameter: ''
+  });
+
+  const handleSearch = () => {
+    if (tireSize.width && tireSize.height && tireSize.diameter) {
+      // Rediriger vers la page des pneus avec les paramètres de recherche
+      navigate(`/pneus?width=${tireSize.width}&height=${tireSize.height}&diameter=${tireSize.diameter}`);
+    } else {
+      // Rediriger vers la page des pneus sans filtres
+      navigate('/pneus');
+    }
+  };
   return (
     <section className="relative bg-gradient-hero text-white overflow-hidden">
       <div className="absolute inset-0 bg-black/20"></div>
@@ -30,35 +48,51 @@ const Hero = () => {
             <h3 className="text-lg font-semibold text-foreground mb-4">Trouvez vos pneus en 30 secondes</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <select className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                <option>Largeur (ex: 205)</option>
-                <option>185</option>
-                <option>195</option>
-                <option>205</option>
-                <option>215</option>
-                <option>225</option>
+              <select 
+                value={tireSize.width}
+                onChange={(e) => setTireSize(prev => ({ ...prev, width: e.target.value }))}
+                className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Largeur (ex: 205)</option>
+                <option value="185">185</option>
+                <option value="195">195</option>
+                <option value="205">205</option>
+                <option value="215">215</option>
+                <option value="225">225</option>
               </select>
               
-              <select className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                <option>Hauteur (ex: 55)</option>
-                <option>45</option>
-                <option>50</option>
-                <option>55</option>
-                <option>60</option>
-                <option>65</option>
+              <select 
+                value={tireSize.height}
+                onChange={(e) => setTireSize(prev => ({ ...prev, height: e.target.value }))}
+                className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Hauteur (ex: 55)</option>
+                <option value="45">45</option>
+                <option value="50">50</option>
+                <option value="55">55</option>
+                <option value="60">60</option>
+                <option value="65">65</option>
               </select>
               
-              <select className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
-                <option>Diamètre (ex: 16)</option>
-                <option>15</option>
-                <option>16</option>
-                <option>17</option>
-                <option>18</option>
-                <option>19</option>
+              <select 
+                value={tireSize.diameter}
+                onChange={(e) => setTireSize(prev => ({ ...prev, diameter: e.target.value }))}
+                className="px-4 py-3 border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Diamètre (ex: 16)</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
               </select>
             </div>
             
-            <Button className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300" size="lg">
+            <Button 
+              onClick={handleSearch}
+              className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300" 
+              size="lg"
+            >
               <Search className="mr-2 h-5 w-5" />
               Rechercher mes pneus
             </Button>
